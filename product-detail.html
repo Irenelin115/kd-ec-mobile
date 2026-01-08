@@ -75,7 +75,7 @@
             <button onclick="openShareDialog()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
                 <i class="fas fa-share-alt text-lg"></i>
             </button>
-            <div class="relative w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full cursor-pointer">
+            <div onclick="goToCart()" class="relative w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full cursor-pointer">
                 <i class="fas fa-shopping-cart text-lg"></i>
                 <span id="cartBadge" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white scale-0 transition-transform duration-200">0</span>
             </div>
@@ -469,11 +469,16 @@
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toastMsg');
             
+            if (!currentProduct) return;
+
             if (isBuyNow) {
-                toastMsg.textContent = `前往結帳 (數量: ${qty})`;
+                // Add to cart and go to checkout
+                addProductToCart(currentProduct, qty);
+                window.location.href = 'checkout.html';
+                return;
             } else {
-                cartCount += qty;
-                localStorage.setItem('cartCount', cartCount.toString());
+                // Add to cart
+                addProductToCart(currentProduct, qty);
                 updateCartBadge();
                 toastMsg.textContent = `已加入 ${qty} 件至購物車`;
             }
@@ -485,11 +490,35 @@
             }, 2000);
         }
 
+        // Add product to cart in localStorage
+        function addProductToCart(product, quantity) {
+            const existingCart = JSON.parse(localStorage.getItem('kd-cart') || '[]');
+            const existingIndex = existingCart.findIndex(item => item.id === product.id);
+            
+            if (existingIndex !== -1) {
+                existingCart[existingIndex].quantity += quantity;
+            } else {
+                existingCart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    quantity: quantity
+                });
+            }
+            
+            localStorage.setItem('kd-cart', JSON.stringify(existingCart));
+        }
+
         // Update cart badge
         function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('kd-cart') || '[]');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
             const badge = document.getElementById('cartBadge');
-            if (cartCount > 0) {
-                badge.textContent = cartCount;
+            badge.textContent = totalItems;
+            
+            if (totalItems > 0) {
                 badge.classList.remove('scale-0');
             } else {
                 badge.classList.add('scale-0');
@@ -510,6 +539,11 @@
         // Go to homepage function
         function goToHomePage() {
             window.location.href = 'https://irenelin115.github.io/kd-ec-mobile/';
+        }
+
+        // Go to cart function
+        function goToCart() {
+            window.location.href = 'cart.html';
         }
 
         // Share functions - Fixed version
@@ -630,6 +664,7 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
             loadProduct();
+            updateCartBadge();
         });
     </script>
 </body>
