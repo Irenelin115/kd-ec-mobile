@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>科定 EC 下單平台 - 木工材料專業供應</title>
+    <title>科定企業行動下單平台</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -45,14 +45,6 @@
         .toast-enter {
             animation: slideUpFade 0.3s ease-out forwards;
         }
-        
-        /* 大字體模式 - 適合50+歲用戶 */
-        .large-font .text-sm { font-size: 1rem; }
-        .large-font .text-xs { font-size: 0.875rem; }
-        .large-font .text-lg { font-size: 1.5rem; }
-        .large-font .text-xl { font-size: 1.75rem; }
-        .large-font button { min-height: 48px; }
-        .large-font .py-2 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -62,15 +54,11 @@
         <div class="flex items-center justify-between px-4 py-3">
             <!-- Logo Area -->
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-kd rounded flex items-center justify-center text-white font-bold">KD</div>
-                <h1 class="text-xl font-bold text-kd tracking-wide">科定企業</h1>
+                <img src="商品圖片/KD_LOGO.png" alt="科定企業" class="h-8 w-auto">
             </div>
             
             <!-- Actions -->
-            <div class="flex items-center gap-3">
-                <button onclick="toggleFontSize()" class="text-gray-600 text-lg" title="大字模式">
-                    <i class="fas fa-text-height"></i>
-                </button>
+            <div class="flex items-center gap-4">
                 <button class="text-gray-600 text-xl"><i class="fas fa-search"></i></button>
                 <div class="relative cursor-pointer" onclick="alert('進入購物車')">
                     <i class="fas fa-shopping-cart text-xl text-kd"></i>
@@ -95,8 +83,8 @@
     <div class="px-4 py-3">
         <div class="w-full h-32 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl flex items-center justify-between px-6 text-white shadow-lg relative overflow-hidden">
             <div class="z-10">
-                <h2 class="text-lg font-bold mb-1">線上下單 專業便利</h2>
-                <p class="text-sm text-gray-300">木工材料 快速叫料</p>
+                <h2 class="text-lg font-bold mb-1">APP 下單享優惠</h2>
+                <p class="text-sm text-gray-300">綜合材料 滿千免運</p>
                 <button class="mt-2 bg-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full">立即選購</button>
             </div>
             <!-- Decorative Icon -->
@@ -108,22 +96,6 @@
     <div class="bg-white py-2 shadow-sm sticky top-[108px] z-40">
         <div class="flex overflow-x-auto hide-scroll px-4 gap-3" id="category-container">
             <!-- Categories will be injected here -->
-        </div>
-    </div>
-
-    <!-- 師傅專用快速叫料橫幅 -->
-    <div class="px-4 py-3">
-        <div class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-            <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center">
-                <i class="fab fa-line text-green-600 text-xl"></i>
-            </div>
-            <div class="flex-1">
-                <h3 class="font-bold text-gray-800 text-sm">木工師傅專用</h3>
-                <p class="text-xs text-gray-600 mt-0.5">點選「快速叫料」→ 5分鐘內業務回覆報價</p>
-            </div>
-            <button onclick="openLineChat()" class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
-                立即聯絡
-            </button>
         </div>
     </div>
 
@@ -163,9 +135,9 @@
             <span class="text-[10px] mt-7">查訂單</span>
         </a>
 
-        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd" onclick="openLineChat()">
-            <i class="fab fa-line text-lg"></i>
-            <span class="text-[10px]">LINE叫料</span>
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd" onclick="alert('開啟業務對話視窗')">
+            <i class="fas fa-comment-alt text-lg"></i>
+            <span class="text-[10px]">聯絡業務</span>
         </a>
         <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd">
             <i class="fas fa-user text-lg"></i>
@@ -183,123 +155,97 @@
     <script>
         // Mock Data: KD Tools & Materials
         const products = [
+            // 角線漆/蠟筆類別
             {
                 id: 1,
-                category: 'flooring',
-                name: '科定 KD 橡木地板 15mm',
-                price: 1850,
-                originalPrice: 2100,
-                image: '橡木地板',
-                tag: '熱銷'
-            },
-            {
-                id: 2,
-                category: 'flooring',
-                name: '科定 KD 胡桃木地板 15mm',
-                price: 2200,
-                originalPrice: 2500,
-                image: '胡桃木地板',
-                tag: '高級'
-            },
-            {
-                id: 3,
-                category: 'adhesives',
-                name: 'KD 專用強力膠 (3kg)',
-                price: 850,
-                originalPrice: 950,
-                image: '強力膠',
-                tag: '師傅推薦'
-            },
-            {
-                id: 4,
-                category: 'adhesives',
-                name: 'KD 環保噴膠 (加強型)',
-                price: 420,
-                originalPrice: 480,
-                image: '環保噴膠',
-                tag: null
-            },
-            {
-                id: 5,
                 category: 'paint',
-                name: 'KD 專用修補漆 (自選色)',
-                price: 350,
+                name: '修邊筆',
+                price: 60,
                 originalPrice: null,
-                image: '修補漆',
-                tag: '多色可選'
-            },
-            {
-                id: 6,
-                category: 'paint',
-                name: 'KD 專用修補筆',
-                price: 150,
-                originalPrice: 180,
-                image: '修補筆',
+                image: '商品圖片/修邊筆.png',
                 tag: '便攜'
             },
             {
-                id: 7,
-                category: 'tools',
-                name: 'KD 羊毛刷 (2吋)',
-                price: 80,
+                id: 2,
+                category: 'paint',
+                name: '修邊蠟筆',
+                price: 85,
                 originalPrice: null,
-                image: '羊毛刷',
-                tag: null
+                image: '商品圖片/修邊蠟筆.png',
+                tag: '熱銷'
             },
             {
-                id: 8,
-                category: 'tools',
-                name: '不織布透氣膠帶 (遮蔽用)',
-                price: 45,
-                originalPrice: 60,
-                image: '遮蔽膠帶',
-                tag: '箱購優惠'
+                id: 3,
+                category: 'paint',
+                name: '角線漆(含修邊筆)',
+                price: 170,
+                originalPrice: null,
+                image: '商品圖片/角線漆(含修邊筆).png',
+                tag: '套組'
             },
             {
-                id: 9,
-                category: 'tools',
-                name: 'KD 塗裝板專用修邊刀',
-                price: 1200,
-                originalPrice: 1500,
-                image: '修邊刀',
+                id: 4,
+                category: 'paint',
+                name: '角線漆組(含修邊筆砂紙)',
+                price: 240,
+                originalPrice: null,
+                image: '商品圖片/角線漆組(含修邊筆砂紙).png',
+                tag: '完整套組'
+            },
+            // 強力膠類別
+            {
+                id: 5,
+                category: 'glue',
+                name: '噴膠-科定300(14.2KG-10桶)',
+                price: 16000,
+                originalPrice: null,
+                image: '商品圖片/噴膠-科定300(14.2KG-10桶).png',
+                tag: '批量優惠'
+            },
+            {
+                id: 6,
+                category: 'glue',
+                name: '噴膠-科定300(14.2KG)',
+                price: 1700,
+                originalPrice: null,
+                image: '商品圖片/噴膠-科定300(14.2KG).png',
                 tag: '專業用'
             },
             {
-                id: 10,
-                category: 'accessories',
-                name: 'KD 收邊條專用膠',
-                price: 280,
+                id: 7,
+                category: 'glue',
+                name: '噴膠-科定300(3KG)',
+                price: 400,
                 originalPrice: null,
-                image: '收邊膠',
-                tag: null
+                image: '商品圖片/噴膠-科定300(3KG).png',
+                tag: '小包裝'
             },
             {
-                id: 11,
-                category: 'accessories',
-                name: '木地板踢腳板 2.4m',
-                price: 120,
-                originalPrice: 150,
-                image: '踢腳板',
-                tag: '配套'
+                id: 8,
+                category: 'glue',
+                name: '塗膠-科定305(14.2KG-10桶)',
+                price: 16000,
+                originalPrice: null,
+                image: '商品圖片/塗膠-科定305(14.2KG-10桶).png',
+                tag: '批量優惠'
             },
             {
-                id: 12,
-                category: 'accessories',
-                name: '地板收邊條 鋁合金',
-                price: 85,
+                id: 9,
+                category: 'glue',
+                name: '塗膠-科定305(14.2KG)',
+                price: 1700,
                 originalPrice: null,
-                image: '收邊條',
-                tag: null
+                image: '商品圖片/塗膠-科定305(14.2KG).png',
+                tag: '專業用'
             }
         ];
 
         const categories = [
             { id: 'all', name: '全部商品' },
-            { id: 'flooring', name: '木地板材' },
-            { id: 'adhesives', name: '黏著劑' },
-            { id: 'paint', name: '塗裝修補' },
-            { id: 'tools', name: '施工工具' },
-            { id: 'accessories', name: '五金配件' }
+            { id: 'glue', name: '強力膠' },
+            { id: 'paint', name: '角線漆/蠟筆' },
+            { id: 'tools', name: '工具配件' },
+            { id: 'materials', name: '裝修底材' }
         ];
 
         let currentCategory = 'all';
@@ -332,10 +278,10 @@
             countLabel.innerText = filtered.length;
 
             grid.innerHTML = filtered.map(product => `
-                <div class="bg-white rounded-lg card-shadow overflow-hidden flex flex-col h-full active:scale-[0.98] transition-transform duration-100">
+                <div onclick="openProductDetail(${product.id})" class="bg-white rounded-lg card-shadow overflow-hidden flex flex-col h-full active:scale-[0.98] transition-transform duration-100 cursor-pointer">
                     <div class="relative w-full h-40 bg-gray-200 flex items-center justify-center overflow-hidden">
-                        <!-- Simulated Product Image using Placehold.co -->
-                        <img src="https://placehold.co/300x300/E5E7EB/003366?text=${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                        <!-- Real Product Image -->
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
                         ${product.tag ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded shadow">${product.tag}</span>` : ''}
                     </div>
                     
@@ -348,21 +294,12 @@
                                 ${product.originalPrice ? `<span class="text-xs text-gray-400 line-through">NT$${product.originalPrice}</span>` : ''}
                             </div>
                             
-                            <!-- 雙按鈕設計：適合不同用戶群體 -->
-                            <div class="mt-3 flex gap-2">
-                                <button 
-                                    onclick="quickOrder('${product.name}')"
-                                    class="flex-1 bg-green-500 text-white py-2 px-3 rounded font-medium text-sm hover:bg-green-600 transition-colors duration-200 flex items-center justify-center gap-1">
-                                    <i class="fab fa-line"></i>
-                                    快速叫料
-                                </button>
-                                <button 
-                                    onclick="addToCart(this)"
-                                    class="flex-1 bg-white border border-kd text-kd hover:bg-kd hover:text-white py-2 px-3 rounded font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-1">
-                                    <i class="fas fa-cart-plus"></i>
-                                    購物車
-                                </button>
-                            </div>
+                            <button 
+                                onclick="addToCart(this)"
+                                class="w-full mt-3 bg-white border border-kd text-kd hover:bg-kd hover:text-white py-2 rounded font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-1">
+                                <i class="fas fa-cart-plus"></i>
+                                加入購物車
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -411,47 +348,13 @@
             }, 2000);
         }
 
-        // LINE Chat Function for 木工師傅
-        function openLineChat() {
-            // 模擬LINE LIFF功能，實際會串接LINE OA
-            alert('正在開啟 LINE 聊天...\n\n可以直接告訴業務：\n• 需要什麼材料\n• 工地地址\n• 預計用量\n\n業務會立即回覆報價！');
-        }
-
-        // 快速叫料功能 - 針對師傅設計的簡化流程
-        function quickOrder(productName) {
-            const message = `我需要: ${productName}\n\n請業務報價，謝謝！`;
-            // 實際會透過LINE API傳送
-            alert(`已發送叫料訊息給業務：\n\n"${message}"\n\n業務將在5分鐘內回覆報價。`);
-        }
-
-        // 大字體模式切換 - 針對50+歲用戶
-        let isLargeFont = false;
-        function toggleFontSize() {
-            isLargeFont = !isLargeFont;
-            const body = document.body;
-            
-            if (isLargeFont) {
-                body.classList.add('large-font');
-                // 儲存用戶偏好
-                localStorage.setItem('kdLargeFont', 'true');
-            } else {
-                body.classList.remove('large-font');
-                localStorage.setItem('kdLargeFont', 'false');
-            }
-        }
-
-        // 載入用戶字體偏好
-        function loadFontPreference() {
-            const savedPref = localStorage.getItem('kdLargeFont');
-            if (savedPref === 'true') {
-                isLargeFont = true;
-                document.body.classList.add('large-font');
-            }
+        // Open product detail page
+        function openProductDetail(productId) {
+            window.location.href = `product-detail.html?id=${productId}`;
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            loadFontPreference();
             renderCategories();
             renderProducts();
         });

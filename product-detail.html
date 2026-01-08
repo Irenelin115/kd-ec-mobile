@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>商品詳情 - 科定企業</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+            padding-bottom: 90px; /* Space for bottom action bar */
+        }
+        
+        .text-kd { color: #003366; }
+        .bg-kd { background-color: #003366; }
+        .border-kd { border-color: #003366; }
+        
+        /* Custom number input styling */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Product Card Shadow */
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- 1. Navigation Bar -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-[56px] flex items-center justify-between px-4 transition-all duration-300">
+        <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </button>
+        
+        <h1 id="productTitle" class="text-base font-bold text-gray-800 truncate px-4 max-w-[200px]">商品詳情</h1>
+        
+        <div class="flex items-center gap-2">
+            <button class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+                <i class="fas fa-share-alt text-lg"></i>
+            </button>
+            <div class="relative w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full cursor-pointer">
+                <i class="fas fa-shopping-cart text-lg"></i>
+                <span id="cartBadge" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white scale-0 transition-transform duration-200">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Spacer -->
+    <div class="h-[56px]"></div>
+
+    <!-- 2. Product Image Carousel Area -->
+    <div class="bg-white w-full aspect-square relative flex items-center justify-center overflow-hidden group">
+        <img id="productImage" src="" alt="Product Image" class="w-full h-full object-cover">
+        
+        <!-- Tags -->
+        <div id="productTags" class="absolute top-4 left-4 flex flex-col gap-2">
+            <!-- Tags will be injected here -->
+        </div>
+
+        <!-- Carousel Indicators (for future use) -->
+        <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-kd"></div>
+            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+            <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+        </div>
+    </div>
+
+    <!-- 3. Product Info -->
+    <div class="bg-white p-4 mb-2 shadow-sm">
+        <h2 id="productName" class="text-xl font-bold text-gray-800 leading-snug mb-2">商品名稱</h2>
+        <p id="productDescription" class="text-sm text-gray-500 mb-4">商品描述</p>
+        
+        <div class="flex items-end justify-between">
+            <div class="flex items-baseline gap-2">
+                <span id="productPrice" class="text-red-600 font-bold text-2xl">NT$0</span>
+                <span id="originalPrice" class="text-sm text-gray-400 line-through hidden">NT$0</span>
+            </div>
+            <span id="salesCount" class="text-xs text-gray-500">熱門商品</span>
+        </div>
+    </div>
+
+    <!-- 4. Specifications & Quantity -->
+    <div class="bg-white p-4 mb-2 shadow-sm">
+        <!-- Related Products -->
+        <div class="mb-4">
+            <label class="block text-sm font-bold text-gray-700 mb-2">相關規格</label>
+            <div id="relatedSpecs" class="flex flex-wrap gap-2">
+                <!-- Related specs will be injected here -->
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="h-px bg-gray-100 my-4"></div>
+
+        <!-- Quantity -->
+        <div class="flex items-center justify-between">
+            <label class="text-sm font-bold text-gray-700">購買數量</label>
+            <div class="flex items-center border border-gray-300 rounded overflow-hidden">
+                <button onclick="updateQty(-1)" class="w-10 h-10 bg-gray-50 flex items-center justify-center text-gray-600 active:bg-gray-200">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <input type="number" id="qtyInput" value="1" class="w-16 h-10 text-center border-l border-r border-gray-300 outline-none text-gray-800 font-bold" readonly>
+                <button onclick="updateQty(1)" class="w-10 h-10 bg-gray-50 flex items-center justify-center text-gray-600 active:bg-gray-200">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Product Details / Content -->
+    <div class="bg-white p-4 mb-4 shadow-sm min-h-[300px]">
+        <h3 class="font-bold text-gray-800 border-l-4 border-kd pl-3 mb-4 text-lg">商品介紹</h3>
+        
+        <div id="productDetails" class="text-sm text-gray-600 leading-relaxed space-y-4">
+            <p>
+                <strong>【產品特色】</strong><br>
+                科定專業材料，品質保證，適合各種裝修需求。
+            </p>
+            <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                <p class="text-kd font-bold mb-1"><i class="fas fa-info-circle mr-1"></i> 注意事項：</p>
+                <ul class="list-disc pl-5 space-y-1 text-xs">
+                    <li>請於通風良好處使用。</li>
+                    <li>避免接觸皮膚與眼睛。</li>
+                    <li>存放於陰涼乾燥處。</li>
+                </ul>
+            </div>
+            <p>
+                <strong>【配送說明】</strong><br>
+                確認訂單後約 2-3 個工作天配送至指定地點。
+            </p>
+        </div>
+        
+        <!-- Toggle Content -->
+        <div class="mt-4 pt-4 border-t border-gray-100 text-center">
+            <button class="text-kd text-sm font-medium flex items-center justify-center gap-1 mx-auto">
+                查看完整規格書 <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 6. Sticky Bottom Action Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] px-4 py-3 z-50 flex items-center gap-3">
+        <!-- Sales Contact -->
+        <div class="flex flex-col items-center justify-center text-gray-500 px-2 cursor-pointer active:text-kd" onclick="openLineChat()">
+            <i class="fab fa-line text-xl mb-0.5"></i>
+            <span class="text-[10px]">問業務</span>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="flex-1 flex gap-2 h-11">
+            <button onclick="addToCart(false)" class="flex-1 border border-kd text-kd bg-white rounded font-bold text-sm active:bg-blue-50">
+                加入購物車
+            </button>
+            <button onclick="addToCart(true)" class="flex-1 bg-yellow-500 text-gray-900 rounded font-bold text-sm shadow-md active:bg-yellow-600">
+                立即購買
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-lg text-sm shadow-lg hidden z-[60] flex items-center gap-3 w-max">
+        <i class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toastMsg">已加入購物車</span>
+    </div>
+
+    <script>
+        // Product data (same as main page)
+        const products = [
+            // 角線漆/蠟筆類別
+            {
+                id: 1,
+                category: 'paint',
+                name: '修邊筆',
+                price: 60,
+                originalPrice: null,
+                image: '商品圖片/修邊筆.png',
+                tag: '便攜',
+                description: '便攜式修邊筆，適合小範圍補色修飾',
+                details: 'KD 修邊筆採用高品質顏料調配，顏色持久不褪色，適合各種木材表面的細部修飾工作。'
+            },
+            {
+                id: 2,
+                category: 'paint',
+                name: '修邊蠟筆',
+                price: 85,
+                originalPrice: null,
+                image: '商品圖片/修邊蠟筆.png',
+                tag: '熱銷',
+                description: '蠟筆質地，容易塗抹，顏色自然',
+                details: 'KD 修邊蠟筆質地柔軟，易於塗抹，能完美融合木材紋理，是專業木工師傅的首選。'
+            },
+            {
+                id: 3,
+                category: 'paint',
+                name: '角線漆(含修邊筆)',
+                price: 170,
+                originalPrice: null,
+                image: '商品圖片/角線漆(含修邊筆).png',
+                tag: '套組',
+                description: '角線漆+修邊筆套組，完整修補方案',
+                details: 'KD 角線漆套組提供完整的修補解決方案，包含角線漆和專用修邊筆，適合大面積和細部的修補工作。',
+                videoId: 'C60Zn_Vzrhw'
+            },
+            {
+                id: 4,
+                category: 'paint',
+                name: '角線漆組(含修邊筆砂紙)',
+                price: 240,
+                originalPrice: null,
+                image: '商品圖片/角線漆組(含修邊筆砂紙).png',
+                tag: '完整套組',
+                description: '完整套組：角線漆+修邊筆+砂紙',
+                details: 'KD 角線漆完整套組，包含角線漆、修邊筆及專用砂紙，從打磨到上色一次到位，是專業級的修補工具組合。'
+            },
+            // 強力膠類別
+            {
+                id: 5,
+                category: 'glue',
+                name: '噴膠-科定300(14.2KG-10桶)',
+                price: 16000,
+                originalPrice: null,
+                image: '商品圖片/噴膠-科定300(14.2KG-10桶).png',
+                tag: '批量優惠',
+                description: '強力黏著、耐高溫、裝修師傅指定款',
+                details: 'KD 300 噴膠是專為室內裝修設計的強力黏著劑，具有乾燥速度快、初黏力強、耐熱性佳等特點。特別適合用於木皮板、美耐板、夾板等貼合工程。'
+            },
+            {
+                id: 6,
+                category: 'glue',
+                name: '噴膠-科定300(14.2KG)',
+                price: 1700,
+                originalPrice: null,
+                image: '商品圖片/噴膠-科定300(14.2KG).png',
+                tag: '專業用',
+                description: '單桶裝，專業級強力噴膠',
+                details: 'KD 300 噴膠單桶裝，適合中型工程使用，具備優異的初黏力和最終黏著強度。'
+            },
+            {
+                id: 7,
+                category: 'glue',
+                name: '噴膠-科定300(3KG)',
+                price: 400,
+                originalPrice: null,
+                image: '商品圖片/噴膠-科定300(3KG).png',
+                tag: '小包裝',
+                description: '小包裝，適合居家DIY使用',
+                details: 'KD 300 噴膠小包裝，方便攜帶和存放，適合小面積貼合作業或居家DIY使用。'
+            },
+            {
+                id: 8,
+                category: 'glue',
+                name: '塗膠-科定305(14.2KG-10桶)',
+                price: 16000,
+                originalPrice: null,
+                image: '商品圖片/塗膠-科定305(14.2KG-10桶).png',
+                tag: '批量優惠',
+                description: '塗刷式強力膠，適合大面積施工',
+                details: 'KD 305 塗膠採用特殊配方，適合使用刷具或滾輪進行大面積塗布，黏著力強且作業效率高。'
+            },
+            {
+                id: 9,
+                category: 'glue',
+                name: '塗膠-科定305(14.2KG)',
+                price: 1700,
+                originalPrice: null,
+                image: '商品圖片/塗膠-科定305(14.2KG).png',
+                tag: '專業用',
+                description: '單桶塗刷式強力膠',
+                details: 'KD 305 塗膠單桶裝，使用方便，黏著效果優異，是專業裝修工程的理想選擇。'
+            }
+        ];
+
+        let currentProduct = null;
+        let cartCount = parseInt(localStorage.getItem('cartCount') || '0');
+
+        // Get product ID from URL parameter
+        function getProductId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return parseInt(urlParams.get('id')) || 1;
+        }
+
+        // Load product data
+        function loadProduct() {
+            const productId = getProductId();
+            currentProduct = products.find(p => p.id === productId);
+            
+            if (!currentProduct) {
+                currentProduct = products[0]; // fallback
+            }
+
+            // Update page content
+            document.getElementById('productTitle').textContent = currentProduct.name;
+            document.getElementById('productImage').src = currentProduct.image;
+            document.getElementById('productName').textContent = currentProduct.name;
+            document.getElementById('productDescription').textContent = currentProduct.description;
+            document.getElementById('productPrice').textContent = `NT$${currentProduct.price.toLocaleString()}`;
+            
+            // Handle original price
+            const originalPriceEl = document.getElementById('originalPrice');
+            if (currentProduct.originalPrice) {
+                originalPriceEl.textContent = `NT$${currentProduct.originalPrice.toLocaleString()}`;
+                originalPriceEl.classList.remove('hidden');
+            }
+
+            // Update tags
+            const tagsContainer = document.getElementById('productTags');
+            if (currentProduct.tag) {
+                tagsContainer.innerHTML = `
+                    <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm">${currentProduct.tag}</span>
+                `;
+            }
+
+            // Update details
+            const detailsContainer = document.getElementById('productDetails');
+            
+            // Check if product has video
+            const videoSection = currentProduct.videoId ? `
+                <div class="mb-6">
+                    <strong class="text-kd text-base">【產品示範影片】</strong>
+                    <div class="mt-3 relative w-full bg-gray-100 rounded-lg overflow-hidden" style="padding-bottom: 56.25%; height: 0;">
+                        <iframe 
+                            class="absolute top-0 left-0 w-full h-full"
+                            src="https://www.youtube.com/embed/${currentProduct.videoId}" 
+                            title="${currentProduct.name} 產品示範"
+                            frameborder="0" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            ` : '';
+            
+            detailsContainer.innerHTML = `
+                <p>
+                    <strong>【產品特色】</strong><br>
+                    ${currentProduct.details}
+                </p>
+                ${videoSection}
+                <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                    <p class="text-kd font-bold mb-1"><i class="fas fa-info-circle mr-1"></i> 施工注意事項：</p>
+                    <ul class="list-disc pl-5 space-y-1 text-xs">
+                        <li>請於通風良好處使用。</li>
+                        <li>避免接觸皮膚與眼睛。</li>
+                        <li>存放於陰涼乾燥處。</li>
+                    </ul>
+                </div>
+                <p>
+                    <strong>【配送說明】</strong><br>
+                    確認訂單後約 2-3 個工作天配送至指定地點。
+                </p>
+            `;
+
+            // Load related specs
+            loadRelatedSpecs();
+            
+            // Update cart badge
+            updateCartBadge();
+        }
+
+        // Load related product specs
+        function loadRelatedSpecs() {
+            const relatedProducts = products.filter(p => 
+                p.category === currentProduct.category && p.id !== currentProduct.id
+            );
+
+            const specsContainer = document.getElementById('relatedSpecs');
+            specsContainer.innerHTML = relatedProducts.map(product => `
+                <button onclick="switchProduct(${product.id})" class="px-4 py-2 bg-white text-gray-600 border border-gray-300 rounded text-sm font-medium hover:border-gray-400">
+                    ${product.name}
+                </button>
+            `).join('');
+        }
+
+        // Switch to different product
+        function switchProduct(productId) {
+            const newUrl = `product-detail.html?id=${productId}`;
+            window.location.href = newUrl;
+        }
+
+        // Quantity Logic
+        function updateQty(change) {
+            const input = document.getElementById('qtyInput');
+            let currentVal = parseInt(input.value);
+            let newVal = currentVal + change;
+            
+            if (newVal < 1) newVal = 1;
+            if (newVal > 99) newVal = 99;
+            
+            input.value = newVal;
+        }
+
+        // Add to Cart Logic
+        function addToCart(isBuyNow) {
+            const qty = parseInt(document.getElementById('qtyInput').value);
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            
+            if (isBuyNow) {
+                toastMsg.textContent = `前往結帳 (數量: ${qty})`;
+            } else {
+                cartCount += qty;
+                localStorage.setItem('cartCount', cartCount.toString());
+                updateCartBadge();
+                toastMsg.textContent = `已加入 ${qty} 件至購物車`;
+            }
+            
+            // Show toast
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Update cart badge
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            if (cartCount > 0) {
+                badge.textContent = cartCount;
+                badge.classList.remove('scale-0');
+            } else {
+                badge.classList.add('scale-0');
+            }
+        }
+
+        // LINE Chat function
+        function openLineChat() {
+            alert('正在開啟 LINE 聊天...\n\n' +
+                  `詢問商品：${currentProduct.name}\n` +
+                  '可以直接告訴業務：\n' +
+                  '• 需要什麼材料\n' +
+                  '• 工地地址\n' +
+                  '• 預計用量\n\n' +
+                  '業務會立即回覆報價！');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProduct();
+        });
+    </script>
+</body>
+</html>
