@@ -65,7 +65,7 @@
 
     <!-- 1. Navigation Bar -->
     <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-[56px] flex items-center justify-between px-4 transition-all duration-300">
-        <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+        <button onclick="goToHomePage()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
             <i class="fas fa-arrow-left text-xl"></i>
         </button>
         
@@ -505,6 +505,11 @@
                   '• 工地地址\n' +
                   '• 預計用量\n\n' +
                   '業務會立即回覆報價！');
+        }
+
+        // Go to homepage function
+        function goToHomePage() {
+            window.location.href = 'https://irenelin115.github.io/kd-ec-mobile/';
         }
 
         // Share functions - Fixed version
