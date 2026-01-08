@@ -33,6 +33,38 @@
         .card-shadow {
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
+
+        /* Share Dialog Styles */
+        .share-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .share-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .share-dialog {
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .share-overlay.active .share-dialog {
+            transform: translateY(0);
+        }
+        
+        /* Share button animations */
+        .share-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .share-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -46,7 +78,7 @@
         <h1 id="productTitle" class="text-base font-bold text-gray-800 truncate px-4 max-w-[200px]">商品詳情</h1>
         
         <div class="flex items-center gap-2">
-            <button class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <button onclick="openShareDialog()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
                 <i class="fas fa-share-alt text-lg"></i>
             </button>
             <div class="relative w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full cursor-pointer">
@@ -172,6 +204,44 @@
     <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-lg text-sm shadow-lg hidden z-[60] flex items-center gap-3 w-max">
         <i class="fas fa-check-circle text-green-400 text-lg"></i>
         <span id="toastMsg">已加入購物車</span>
+    </div>
+
+    <!-- Share Dialog -->
+    <div id="shareOverlay" class="fixed inset-0 z-[70] share-overlay flex items-end">
+        <div class="share-dialog w-full bg-white rounded-t-2xl shadow-xl">
+            <!-- Dialog Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800">分享給您的家人朋友！</h3>
+                <button onclick="closeShareDialog()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 active:bg-gray-100 rounded-full">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Share Options -->
+            <div class="p-6">
+                <!-- Main share buttons -->
+                <div class="flex justify-center gap-4 mb-6">
+                    <div class="text-center">
+                        <button onclick="shareToLine()" class="share-btn w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mb-2 shadow-lg">
+                            <i class="fab fa-line text-2xl"></i>
+                        </button>
+                        <span class="text-xs text-gray-600">Line</span>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button onclick="copyLink()" class="share-btn w-16 h-16 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center mb-2 shadow-lg">
+                            <i class="fas fa-link text-xl"></i>
+                        </button>
+                        <span class="text-xs text-gray-600">複製連結</span>
+                    </div>
+                </div>
+                
+                <!-- Close button -->
+                <button onclick="closeShareDialog()" class="w-full py-3 text-gray-600 text-sm font-medium border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                    取消
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -442,6 +512,94 @@
                   '• 預計用量\n\n' +
                   '業務會立即回覆報價！');
         }
+
+        // Share functions
+        function openShareDialog() {
+            const overlay = document.getElementById('shareOverlay');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scroll
+        }
+
+        function closeShareDialog() {
+            const overlay = document.getElementById('shareOverlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scroll
+        }
+
+        function shareToLine() {
+            if (!currentProduct) return;
+            
+            const url = window.location.href;
+            const text = `${currentProduct.name} - NT$${currentProduct.price.toLocaleString()}\n${currentProduct.description}`;
+            const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+            
+            // Try to open LINE app first, fallback to web
+            try {
+                window.open(lineUrl, '_blank');
+                closeShareDialog();
+                showShareToast('已分享到 LINE');
+            } catch (error) {
+                showShareToast('無法開啟 LINE 分享');
+            }
+        }
+
+        function copyLink() {
+            const url = window.location.href;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    closeShareDialog();
+                    showShareToast('連結已複製到剪貼板');
+                }).catch(() => {
+                    fallbackCopyText(url);
+                });
+            } else {
+                fallbackCopyText(url);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                closeShareDialog();
+                showShareToast('連結已複製到剪貼板');
+            } catch (error) {
+                closeShareDialog();
+                showShareToast('無法複製連結');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showShareToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Close dialog when clicking outside
+        document.addEventListener('click', (e) => {
+            const overlay = document.getElementById('shareOverlay');
+            const dialog = overlay.querySelector('.share-dialog');
+            
+            if (overlay.classList.contains('active') && !dialog.contains(e.target)) {
+                closeShareDialog();
+            }
+        });
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
