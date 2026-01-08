@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>訂單詳情 - 科定企業</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+            padding-bottom: 20px;
+        }
+        
+        .text-kd { color: #003366; }
+        .bg-kd { background-color: #003366; }
+        .border-kd { border-color: #003366; }
+        
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .status-pending { color: #f59e0b; background-color: #fef3c7; }
+        .status-confirmed { color: #3b82f6; background-color: #dbeafe; }
+        .status-shipping { color: #8b5cf6; background-color: #e9d5ff; }
+        .status-completed { color: #10b981; background-color: #d1fae5; }
+        .status-cancelled { color: #ef4444; background-color: #fee2e2; }
+        
+        .timeline-step {
+            position: relative;
+        }
+        
+        .timeline-step::after {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 40px;
+            width: 2px;
+            height: 100%;
+            background: #e5e7eb;
+        }
+        
+        .timeline-step:last-child::after {
+            display: none;
+        }
+        
+        .timeline-step.active::after {
+            background: #003366;
+        }
+        
+        .timeline-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 14px;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .timeline-step.active .timeline-dot {
+            background: #003366;
+            color: white;
+        }
+        
+        .timeline-step.completed .timeline-dot {
+            background: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-[56px] flex items-center justify-between px-4">
+        <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </button>
+        
+        <h1 class="text-lg font-bold text-gray-800">訂單詳情</h1>
+        
+        <button onclick="shareOrder()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <i class="fas fa-share-alt text-lg"></i>
+        </button>
+    </header>
+
+    <!-- Spacer -->
+    <div class="h-[56px]"></div>
+
+    <!-- Order Not Found -->
+    <div id="orderNotFound" class="px-4 py-20 text-center hidden">
+        <i class="fas fa-exclamation-circle text-6xl text-gray-300 mb-4"></i>
+        <h2 class="text-xl font-bold text-gray-500 mb-2">找不到訂單</h2>
+        <p class="text-gray-400 mb-6">此訂單可能已被刪除或不存在</p>
+        <button onclick="goToOrders()" class="bg-kd text-white px-6 py-3 rounded-lg font-medium">
+            返回訂單列表
+        </button>
+    </div>
+
+    <!-- Order Detail Content -->
+    <div id="orderContent" class="hidden">
+        <!-- Order Status -->
+        <div class="bg-white mx-4 mt-4 rounded-lg card-shadow p-4">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">訂單狀態</h2>
+                    <div id="orderNumber" class="text-sm text-gray-500"></div>
+                </div>
+                <div id="orderStatus" class="px-3 py-1 rounded-full text-sm font-medium"></div>
+            </div>
+            
+            <!-- Order Timeline -->
+            <div id="orderTimeline" class="space-y-4">
+                <!-- Timeline steps will be injected here -->
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="bg-white mx-4 mt-4 rounded-lg card-shadow p-4">
+            <h3 class="font-bold text-gray-800 text-lg mb-3 border-l-4 border-kd pl-3">訂單明細</h3>
+            <div id="orderItems" class="space-y-3">
+                <!-- Order items will be injected here -->
+            </div>
+        </div>
+
+        <!-- Shipping Info -->
+        <div class="bg-white mx-4 mt-4 rounded-lg card-shadow p-4">
+            <h3 class="font-bold text-gray-800 text-lg mb-3 border-l-4 border-kd pl-3">配送資訊</h3>
+            <div id="shippingInfo" class="space-y-2">
+                <!-- Shipping info will be injected here -->
+            </div>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="bg-white mx-4 mt-4 rounded-lg card-shadow p-4">
+            <h3 class="font-bold text-gray-800 text-lg mb-3 border-l-4 border-kd pl-3">付款資訊</h3>
+            <div id="paymentInfo">
+                <!-- Payment info will be injected here -->
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="bg-white mx-4 mt-4 rounded-lg card-shadow p-4">
+            <h3 class="font-bold text-gray-800 text-lg mb-3 border-l-4 border-kd pl-3">費用明細</h3>
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">商品小計</span>
+                    <span id="subtotal">NT$0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">運費</span>
+                    <span class="text-green-600">免費</span>
+                </div>
+                <div class="border-t border-gray-200 pt-2 mt-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-lg">總計</span>
+                        <span id="totalAmount" class="font-bold text-xl text-kd">NT$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes (if any) -->
+        <div id="notesSection" class="bg-white mx-4 mt-4 rounded-lg card-shadow p-4 hidden">
+            <h3 class="font-bold text-gray-800 text-lg mb-3 border-l-4 border-kd pl-3">備註</h3>
+            <div id="orderNotes" class="text-gray-600">
+                <!-- Notes will be injected here -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="actionButtons" class="mx-4 mt-6 space-y-3">
+            <!-- Action buttons will be injected based on order status -->
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-lg text-sm shadow-lg hidden z-[60] flex items-center gap-3 w-max">
+        <i class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toastMsg">操作成功</span>
+    </div>
+
+    <script>
+        let currentOrder = null;
+
+        // Get order ID from URL
+        function getOrderId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Load order details
+        function loadOrderDetail() {
+            const orderId = getOrderId();
+            if (!orderId) {
+                showOrderNotFound();
+                return;
+            }
+
+            const savedOrders = localStorage.getItem('kd-orders');
+            const orders = savedOrders ? JSON.parse(savedOrders) : [];
+            currentOrder = orders.find(order => order.orderId === orderId);
+
+            if (!currentOrder) {
+                showOrderNotFound();
+                return;
+            }
+
+            document.getElementById('orderContent').classList.remove('hidden');
+            renderOrderDetail();
+        }
+
+        // Show order not found
+        function showOrderNotFound() {
+            document.getElementById('orderNotFound').classList.remove('hidden');
+        }
+
+        // Render order detail
+        function renderOrderDetail() {
+            // Order number and status
+            document.getElementById('orderNumber').textContent = `訂單編號：${currentOrder.orderId}`;
+            
+            const statusInfo = getStatusInfo(currentOrder.status);
+            const statusElement = document.getElementById('orderStatus');
+            statusElement.textContent = statusInfo.text;
+            statusElement.className = `px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgClass}`;
+
+            // Order timeline
+            renderTimeline();
+
+            // Order items
+            renderOrderItems();
+
+            // Shipping info
+            renderShippingInfo();
+
+            // Payment info
+            renderPaymentInfo();
+
+            // Order totals
+            document.getElementById('subtotal').textContent = `NT$${currentOrder.total.toLocaleString()}`;
+            document.getElementById('totalAmount').textContent = `NT$${currentOrder.total.toLocaleString()}`;
+
+            // Notes
+            if (currentOrder.notes && currentOrder.notes.trim()) {
+                document.getElementById('notesSection').classList.remove('hidden');
+                document.getElementById('orderNotes').textContent = currentOrder.notes;
+            }
+
+            // Action buttons
+            renderActionButtons();
+        }
+
+        // Render order timeline
+        function renderTimeline() {
+            const timeline = document.getElementById('orderTimeline');
+            const steps = [
+                { key: 'pending', text: '訂單已建立', icon: 'fas fa-file-alt' },
+                { key: 'confirmed', text: '訂單已確認', icon: 'fas fa-check-circle' },
+                { key: 'shipping', text: '商品配送中', icon: 'fas fa-truck' },
+                { key: 'completed', text: '訂單完成', icon: 'fas fa-check-double' }
+            ];
+
+            const currentStatusIndex = steps.findIndex(step => step.key === currentOrder.status);
+
+            timeline.innerHTML = steps.map((step, index) => {
+                let stepClass = 'timeline-step';
+                if (index < currentStatusIndex) {
+                    stepClass += ' completed';
+                } else if (index === currentStatusIndex) {
+                    stepClass += ' active';
+                }
+
+                return `
+                    <div class="${stepClass}">
+                        <div class="flex items-center gap-3">
+                            <div class="timeline-dot">
+                                <i class="${step.icon}"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-800">${step.text}</div>
+                                ${index <= currentStatusIndex ? `
+                                    <div class="text-xs text-gray-500">
+                                        ${new Date(currentOrder.orderDate).toLocaleDateString('zh-TW')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render order items
+        function renderOrderItems() {
+            const itemsContainer = document.getElementById('orderItems');
+            itemsContainer.innerHTML = currentOrder.items.map(item => `
+                <div class="flex gap-3 py-2">
+                    <div class="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-800">${item.name}</div>
+                        <div class="text-sm text-gray-500">NT$${item.price.toLocaleString()} × ${item.quantity}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-gray-800">NT$${(item.price * item.quantity).toLocaleString()}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render shipping info
+        function renderShippingInfo() {
+            const shipping = currentOrder.shipping;
+            const shippingContainer = document.getElementById('shippingInfo');
+            
+            shippingContainer.innerHTML = `
+                <div class="space-y-2">
+                    <div><span class="text-gray-600 w-20 inline-block">收件人：</span>${shipping.fullName}</div>
+                    <div><span class="text-gray-600 w-20 inline-block">電話：</span>${shipping.phoneNumber}</div>
+                    <div><span class="text-gray-600 w-20 inline-block">地址：</span>${shipping.postalCode} ${shipping.cityDistrict} ${shipping.streetAddress}</div>
+                    <div><span class="text-gray-600 w-20 inline-block">類型：</span>${shipping.addressType === 'work' ? '工作' : '住家'}</div>
+                </div>
+            `;
+        }
+
+        // Render payment info
+        function renderPaymentInfo() {
+            const paymentMethods = {
+                'cod': '貨到付款',
+                'transfer': '銀行轉帳',
+                'credit': '信用卡付款'
+            };
+
+            const paymentContainer = document.getElementById('paymentInfo');
+            paymentContainer.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">付款方式：</span>
+                    <span class="font-medium">${paymentMethods[currentOrder.paymentMethod] || '未知'}</span>
+                </div>
+            `;
+        }
+
+        // Render action buttons based on order status
+        function renderActionButtons() {
+            const buttonsContainer = document.getElementById('actionButtons');
+            let buttons = '';
+
+            switch (currentOrder.status) {
+                case 'pending':
+                    buttons = `
+                        <button onclick="cancelOrder()" class="w-full py-3 border border-red-500 text-red-500 rounded-lg font-medium">
+                            取消訂單
+                        </button>
+                    `;
+                    break;
+                case 'completed':
+                    buttons = `
+                        <button onclick="reorderItems()" class="w-full py-3 bg-kd text-white rounded-lg font-medium">
+                            重新訂購
+                        </button>
+                    `;
+                    break;
+            }
+
+            buttonsContainer.innerHTML = buttons;
+        }
+
+        // Get status display info
+        function getStatusInfo(status) {
+            const statusMap = {
+                'pending': { text: '待確認', bgClass: 'status-pending' },
+                'confirmed': { text: '處理中', bgClass: 'status-confirmed' },
+                'shipping': { text: '配送中', bgClass: 'status-shipping' },
+                'completed': { text: '已完成', bgClass: 'status-completed' },
+                'cancelled': { text: '已取消', bgClass: 'status-cancelled' }
+            };
+            return statusMap[status] || { text: '未知', bgClass: 'bg-gray-100' };
+        }
+
+        // Cancel order
+        function cancelOrder() {
+            if (confirm('確定要取消此訂單嗎？')) {
+                const orders = JSON.parse(localStorage.getItem('kd-orders') || '[]');
+                const orderIndex = orders.findIndex(order => order.orderId === currentOrder.orderId);
+                
+                if (orderIndex !== -1) {
+                    orders[orderIndex].status = 'cancelled';
+                    localStorage.setItem('kd-orders', JSON.stringify(orders));
+                    currentOrder.status = 'cancelled';
+                    renderOrderDetail();
+                    showToast('訂單已取消');
+                }
+            }
+        }
+
+        // Reorder items
+        function reorderItems() {
+            // Add items back to cart
+            const existingCart = JSON.parse(localStorage.getItem('kd-cart') || '[]');
+            
+            currentOrder.items.forEach(orderItem => {
+                const existingIndex = existingCart.findIndex(item => item.id === orderItem.id);
+                
+                if (existingIndex !== -1) {
+                    existingCart[existingIndex].quantity += orderItem.quantity;
+                } else {
+                    existingCart.push({ ...orderItem });
+                }
+            });
+
+            localStorage.setItem('kd-cart', JSON.stringify(existingCart));
+            showToast('商品已加入購物車');
+            
+            setTimeout(() => {
+                window.location.href = 'cart.html';
+            }, 1500);
+        }
+
+        // Share order
+        function shareOrder() {
+            const shareText = `我在科定企業下了訂單！\n訂單編號：${currentOrder.orderId}\n總金額：NT$${currentOrder.total.toLocaleString()}`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showToast('訂單資訊已複製');
+                });
+            } else {
+                showToast('無法複製訂單資訊');
+            }
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Navigation
+        function goBack() {
+            window.location.href = 'orders.html';
+        }
+
+        function goToOrders() {
+            window.location.href = 'orders.html';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrderDetail();
+        });
+    </script>
+</body>
+</html>

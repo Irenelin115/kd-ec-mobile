@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>結帳 - 科定企業</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+            padding-bottom: 100px;
+        }
+        
+        .text-kd { color: #003366; }
+        .bg-kd { background-color: #003366; }
+        .border-kd { border-color: #003366; }
+        
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: #ddd;
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle.active {
+            background: #003366;
+        }
+        
+        .toggle-slider {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .toggle.active .toggle-slider {
+            transform: translateX(22px);
+        }
+        
+        .address-type-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .address-type-btn.active {
+            background-color: #003366;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-[56px] flex items-center justify-between px-4">
+        <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </button>
+        
+        <h1 class="text-lg font-bold text-gray-800">結帳</h1>
+        
+        <div class="w-10 h-10"></div> <!-- Spacer -->
+    </header>
+
+    <!-- Spacer -->
+    <div class="h-[56px]"></div>
+
+    <!-- Checkout Form -->
+    <div class="px-4 py-4">
+        <!-- Order Summary -->
+        <div class="bg-white rounded-lg card-shadow p-4 mb-4">
+            <h2 class="font-bold text-gray-800 text-lg mb-3 border-l-4 border-kd pl-3">訂單摘要</h2>
+            <div id="orderSummary" class="space-y-2">
+                <!-- Order items will be injected here -->
+            </div>
+            <div class="border-t border-gray-200 pt-3 mt-3">
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-lg">總計</span>
+                    <span id="totalAmount" class="font-bold text-xl text-kd">NT$0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Address -->
+        <div class="bg-white rounded-lg card-shadow p-4 mb-4">
+            <h2 class="font-bold text-gray-800 text-lg mb-4 border-l-4 border-kd pl-3">配送地址</h2>
+            
+            <form id="checkoutForm">
+                <!-- Full Name -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">姓名 *</label>
+                    <input type="text" id="fullName" name="fullName" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                           placeholder="請輸入收件人姓名">
+                </div>
+
+                <!-- Phone Number -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">電話號碼 *</label>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                           placeholder="請輸入手機號碼">
+                </div>
+
+                <!-- City & District -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">城市、區 *</label>
+                    <div class="relative">
+                        <select id="cityDistrict" name="cityDistrict" required
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none bg-white">
+                            <option value="">請選擇城市、區</option>
+                            <option value="台北市-中正區">台北市 中正區</option>
+                            <option value="台北市-大同區">台北市 大同區</option>
+                            <option value="台北市-中山區">台北市 中山區</option>
+                            <option value="台北市-松山區">台北市 松山區</option>
+                            <option value="台北市-大安區">台北市 大安區</option>
+                            <option value="台北市-萬華區">台北市 萬華區</option>
+                            <option value="台北市-信義區">台北市 信義區</option>
+                            <option value="新北市-板橋區">新北市 板橋區</option>
+                            <option value="新北市-三重區">新北市 三重區</option>
+                            <option value="新北市-中和區">新北市 中和區</option>
+                            <option value="桃園市-桃園區">桃園市 桃園區</option>
+                            <option value="台中市-西屯區">台中市 西屯區</option>
+                            <option value="台南市-東區">台南市 東區</option>
+                            <option value="高雄市-苓雅區">高雄市 苓雅區</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Postal Code -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">郵遞區號 *</label>
+                    <input type="text" id="postalCode" name="postalCode" required
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                           placeholder="請輸入郵遞區號" maxlength="5">
+                </div>
+
+                <!-- Street Address -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">街道地址 *</label>
+                    <textarea id="streetAddress" name="streetAddress" required rows="2"
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                              placeholder="請輸入詳細地址（街道、巷弄、門牌、樓層等）"></textarea>
+                </div>
+
+                <!-- Set as Default Address -->
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-sm font-medium text-gray-700">設為預設地址</span>
+                    <div class="toggle" onclick="toggleDefault()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <!-- Address Type -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">標記為：</label>
+                    <div class="flex gap-3">
+                        <button type="button" class="address-type-btn flex-1 py-3 px-4 border border-gray-300 rounded-lg text-center active"
+                                onclick="selectAddressType('work')" id="workBtn">
+                            工作
+                        </button>
+                        <button type="button" class="address-type-btn flex-1 py-3 px-4 border border-gray-300 rounded-lg text-center"
+                                onclick="selectAddressType('home')" id="homeBtn">
+                            住家
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-800 text-lg mb-3 border-l-4 border-kd pl-3">付款方式</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="paymentMethod" value="cod" class="mr-3" checked>
+                            <span>貨到付款</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="paymentMethod" value="transfer" class="mr-3">
+                            <span>銀行轉帳</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="paymentMethod" value="credit" class="mr-3">
+                            <span>信用卡付款</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">備註（選填）</label>
+                    <textarea id="notes" name="notes" rows="3"
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+                              placeholder="有任何特殊需求或注意事項請在此說明..."></textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Checkout Button (Fixed Bottom) -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4">
+        <button onclick="submitOrder()" class="w-full bg-yellow-500 text-gray-900 py-3 rounded-lg font-bold text-lg active:bg-yellow-600">
+            確認訂單
+        </button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-lg text-sm shadow-lg hidden z-[60] flex items-center gap-3 w-max">
+        <i class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toastMsg">操作成功</span>
+    </div>
+
+    <script>
+        let cartItems = [];
+        let isDefaultAddress = false;
+        let selectedAddressType = 'work';
+
+        // Load cart and display order summary
+        function loadOrderSummary() {
+            const savedCart = localStorage.getItem('kd-cart');
+            cartItems = savedCart ? JSON.parse(savedCart) : [];
+
+            if (cartItems.length === 0) {
+                alert('購物車是空的！');
+                window.location.href = 'cart.html';
+                return;
+            }
+
+            const summaryContainer = document.getElementById('orderSummary');
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            summaryContainer.innerHTML = cartItems.map(item => `
+                <div class="flex justify-between items-center py-2">
+                    <div class="flex-1">
+                        <span class="text-sm font-medium">${item.name}</span>
+                        <span class="text-xs text-gray-500 ml-2">x${item.quantity}</span>
+                    </div>
+                    <span class="text-sm font-bold">NT$${(item.price * item.quantity).toLocaleString()}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('totalAmount').textContent = `NT$${total.toLocaleString()}`;
+        }
+
+        // Toggle default address
+        function toggleDefault() {
+            isDefaultAddress = !isDefaultAddress;
+            const toggle = document.querySelector('.toggle');
+            toggle.classList.toggle('active', isDefaultAddress);
+        }
+
+        // Select address type
+        function selectAddressType(type) {
+            selectedAddressType = type;
+            const workBtn = document.getElementById('workBtn');
+            const homeBtn = document.getElementById('homeBtn');
+
+            workBtn.classList.toggle('active', type === 'work');
+            homeBtn.classList.toggle('active', type === 'home');
+        }
+
+        // Auto-fill postal code based on city selection
+        document.getElementById('cityDistrict').addEventListener('change', function() {
+            const postalCodes = {
+                '台北市-中正區': '100',
+                '台北市-大同區': '103',
+                '台北市-中山區': '104',
+                '台北市-松山區': '105',
+                '台北市-大安區': '106',
+                '台北市-萬華區': '108',
+                '台北市-信義區': '110',
+                '新北市-板橋區': '220',
+                '新北市-三重區': '241',
+                '新北市-中和區': '235',
+                '桃園市-桃園區': '330',
+                '台中市-西屯區': '407',
+                '台南市-東區': '701',
+                '高雄市-苓雅區': '802'
+            };
+            
+            const selectedCity = this.value;
+            const postalCodeInput = document.getElementById('postalCode');
+            
+            if (postalCodes[selectedCity]) {
+                postalCodeInput.value = postalCodes[selectedCity];
+            }
+        });
+
+        // Submit order
+        function submitOrder() {
+            const form = document.getElementById('checkoutForm');
+            
+            // Validate required fields
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Collect form data
+            const orderData = {
+                orderId: generateOrderId(),
+                orderDate: new Date().toISOString(),
+                items: cartItems,
+                shipping: {
+                    fullName: document.getElementById('fullName').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    cityDistrict: document.getElementById('cityDistrict').value,
+                    postalCode: document.getElementById('postalCode').value,
+                    streetAddress: document.getElementById('streetAddress').value,
+                    isDefault: isDefaultAddress,
+                    addressType: selectedAddressType
+                },
+                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
+                notes: document.getElementById('notes').value,
+                status: 'pending',
+                total: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            };
+
+            // Save order
+            saveOrder(orderData);
+            
+            // Clear cart
+            localStorage.removeItem('kd-cart');
+            localStorage.setItem('kd-cart-count', '0');
+            
+            // Redirect to order confirmation
+            window.location.href = `order-detail.html?id=${orderData.orderId}`;
+        }
+
+        // Generate order ID
+        function generateOrderId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `KD${timestamp}${random}`;
+        }
+
+        // Save order to localStorage
+        function saveOrder(orderData) {
+            const existingOrders = JSON.parse(localStorage.getItem('kd-orders') || '[]');
+            existingOrders.push(orderData);
+            localStorage.setItem('kd-orders', JSON.stringify(existingOrders));
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Navigation
+        function goBack() {
+            window.location.href = 'cart.html';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrderSummary();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>購物車 - 科定企業</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+            padding-bottom: 100px;
+        }
+        
+        .text-kd { color: #003366; }
+        .bg-kd { background-color: #003366; }
+        .border-kd { border-color: #003366; }
+        
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .empty-cart-icon {
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-[56px] flex items-center justify-between px-4">
+        <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </button>
+        
+        <h1 class="text-lg font-bold text-gray-800">購物車</h1>
+        
+        <div class="w-10 h-10"></div> <!-- Spacer -->
+    </header>
+
+    <!-- Spacer -->
+    <div class="h-[56px]"></div>
+
+    <!-- Cart Content -->
+    <div class="px-4 py-4">
+        <!-- Empty Cart State -->
+        <div id="emptyCart" class="text-center py-20 hidden">
+            <i class="fas fa-shopping-cart text-6xl text-gray-300 empty-cart-icon mb-4"></i>
+            <h2 class="text-xl font-bold text-gray-500 mb-2">購物車是空的</h2>
+            <p class="text-gray-400 mb-6">快去選購您需要的材料吧！</p>
+            <button onclick="goToHome()" class="bg-kd text-white px-6 py-3 rounded-lg font-medium">
+                前往購物
+            </button>
+        </div>
+
+        <!-- Cart Items -->
+        <div id="cartItems" class="space-y-3">
+            <!-- Cart items will be injected here -->
+        </div>
+    </div>
+
+    <!-- Cart Summary (Fixed Bottom) -->
+    <div id="cartSummary" class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-gray-600">總計</span>
+            <span id="totalAmount" class="text-xl font-bold text-kd">NT$0</span>
+        </div>
+        <button onclick="goToCheckout()" class="w-full bg-yellow-500 text-gray-900 py-3 rounded-lg font-bold text-lg active:bg-yellow-600">
+            前往結帳
+        </button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-lg text-sm shadow-lg hidden z-[60] flex items-center gap-3 w-max">
+        <i class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toastMsg">操作成功</span>
+    </div>
+
+    <script>
+        // Cart management
+        let cartItems = [];
+
+        // Load cart from localStorage
+        function loadCart() {
+            const savedCart = localStorage.getItem('kd-cart');
+            cartItems = savedCart ? JSON.parse(savedCart) : [];
+            renderCart();
+            updateTotal();
+        }
+
+        // Save cart to localStorage
+        function saveCart() {
+            localStorage.setItem('kd-cart', JSON.stringify(cartItems));
+            updateCartBadge();
+        }
+
+        // Update cart badge count
+        function updateCartBadge() {
+            const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            // This will update badges on other pages when they're visited
+            localStorage.setItem('kd-cart-count', totalItems.toString());
+        }
+
+        // Render cart items
+        function renderCart() {
+            const cartContainer = document.getElementById('cartItems');
+            const emptyCart = document.getElementById('emptyCart');
+            const cartSummary = document.getElementById('cartSummary');
+
+            if (cartItems.length === 0) {
+                cartContainer.classList.add('hidden');
+                emptyCart.classList.remove('hidden');
+                cartSummary.classList.add('hidden');
+                return;
+            }
+
+            cartContainer.classList.remove('hidden');
+            emptyCart.classList.add('hidden');
+            cartSummary.classList.remove('hidden');
+
+            cartContainer.innerHTML = cartItems.map(item => `
+                <div class="bg-white rounded-lg card-shadow p-4 flex gap-3">
+                    <!-- Product Image -->
+                    <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-gray-800 text-sm leading-tight mb-1 truncate">${item.name}</h3>
+                        <p class="text-red-600 font-bold text-lg">NT$${item.price.toLocaleString()}</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <!-- Quantity Controls -->
+                            <div class="flex items-center border border-gray-300 rounded overflow-hidden">
+                                <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" 
+                                        class="w-8 h-8 bg-gray-50 flex items-center justify-center text-gray-600 active:bg-gray-200">
+                                    <i class="fas fa-minus text-xs"></i>
+                                </button>
+                                <span class="w-10 h-8 flex items-center justify-center text-sm font-bold border-l border-r border-gray-300">
+                                    ${item.quantity}
+                                </span>
+                                <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" 
+                                        class="w-8 h-8 bg-gray-50 flex items-center justify-center text-gray-600 active:bg-gray-200">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Remove Item -->
+                            <button onclick="removeItem(${item.id})" 
+                                    class="text-red-500 hover:text-red-700 active:text-red-800 ml-2">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Subtotal -->
+                        <div class="text-right mt-2">
+                            <span class="text-sm text-gray-500">小計：</span>
+                            <span class="font-bold text-gray-800">NT$${(item.price * item.quantity).toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update item quantity
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeItem(productId);
+                return;
+            }
+
+            const itemIndex = cartItems.findIndex(item => item.id === productId);
+            if (itemIndex !== -1) {
+                cartItems[itemIndex].quantity = Math.min(newQuantity, 99); // Max 99
+                saveCart();
+                renderCart();
+                updateTotal();
+                showToast('數量已更新');
+            }
+        }
+
+        // Remove item from cart
+        function removeItem(productId) {
+            cartItems = cartItems.filter(item => item.id !== productId);
+            saveCart();
+            renderCart();
+            updateTotal();
+            showToast('商品已移除');
+        }
+
+        // Update total amount
+        function updateTotal() {
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('totalAmount').textContent = `NT$${total.toLocaleString()}`;
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Navigation functions
+        function goBack() {
+            history.back();
+        }
+
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        function goToCheckout() {
+            if (cartItems.length === 0) {
+                showToast('購物車是空的');
+                return;
+            }
+            window.location.href = 'checkout.html';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCart();
+        });
+    </script>
+</body>
+</html>

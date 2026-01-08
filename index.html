@@ -148,7 +148,7 @@
             <!-- Actions -->
             <div class="flex items-center gap-4">
                 <button class="text-gray-600 text-xl"><i class="fas fa-search"></i></button>
-                <div class="relative cursor-pointer" onclick="alert('進入購物車')">
+                <div class="relative cursor-pointer" onclick="goToCart()">
                     <i class="fas fa-shopping-cart text-xl text-kd"></i>
                     <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white transform scale-0 transition-transform duration-200">0</span>
                 </div>
@@ -216,7 +216,7 @@
         </a>
         
         <!-- Center Action Button (Orders) -->
-        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd relative">
+        <a href="orders.html" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd relative">
             <div class="absolute -top-6 bg-kd w-12 h-12 rounded-full border-4 border-gray-100 flex items-center justify-center text-white shadow-lg">
                 <i class="fas fa-clipboard-list text-xl"></i>
             </div>
@@ -421,11 +421,24 @@
         }
 
         function addToCart(btn) {
+            // Get product ID from button's parent card
+            const productCard = btn.closest('[onclick*="openProductDetail"]');
+            if (!productCard) return;
+            
+            const productIdMatch = productCard.getAttribute('onclick').match(/openProductDetail\((\d+)\)/);
+            if (!productIdMatch) return;
+            
+            const productId = parseInt(productIdMatch[1]);
+            const product = products.find(p => p.id === productId);
+            
+            if (!product) return;
+
+            // Add to cart in localStorage
+            addProductToCart(product, 1);
+
             // UI Feedback
-            cartCount++;
             const badge = document.getElementById('cart-badge');
-            badge.innerText = cartCount;
-            badge.classList.remove('scale-0');
+            updateCartBadgeFromStorage();
             
             // Button Animation
             const originalText = btn.innerHTML;
@@ -441,6 +454,46 @@
 
             // Toast Notification
             showToast();
+        }
+
+        // Add product to cart in localStorage
+        function addProductToCart(product, quantity) {
+            const existingCart = JSON.parse(localStorage.getItem('kd-cart') || '[]');
+            const existingIndex = existingCart.findIndex(item => item.id === product.id);
+            
+            if (existingIndex !== -1) {
+                existingCart[existingIndex].quantity += quantity;
+            } else {
+                existingCart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    quantity: quantity
+                });
+            }
+            
+            localStorage.setItem('kd-cart', JSON.stringify(existingCart));
+        }
+
+        // Update cart badge from localStorage
+        function updateCartBadgeFromStorage() {
+            const cart = JSON.parse(localStorage.getItem('kd-cart') || '[]');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            const badge = document.getElementById('cart-badge');
+            badge.innerText = totalItems;
+            
+            if (totalItems > 0) {
+                badge.classList.remove('scale-0');
+            } else {
+                badge.classList.add('scale-0');
+            }
+        }
+
+        // Go to cart page
+        function goToCart() {
+            window.location.href = 'cart.html';
         }
 
         function showToast() {
@@ -579,8 +632,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderCategories();
             renderProducts();
+            updateCartBadgeFromStorage();
             console.log('🚀 首頁載入完成');
-            console.log('🔍 shareModal 元素:', document.getElementById('shareModal'));
         });
 
     </script>

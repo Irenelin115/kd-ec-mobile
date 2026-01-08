@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的訂單 - 科定企業</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+            padding-bottom: 90px;
+        }
+        
+        .text-kd { color: #003366; }
+        .bg-kd { background-color: #003366; }
+        .border-kd { border-color: #003366; }
+        
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .status-pending { color: #f59e0b; }
+        .status-confirmed { color: #3b82f6; }
+        .status-shipping { color: #8b5cf6; }
+        .status-completed { color: #10b981; }
+        .status-cancelled { color: #ef4444; }
+        
+        .empty-orders-icon {
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-[56px] flex items-center justify-between px-4">
+        <button onclick="goToHome()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </button>
+        
+        <h1 class="text-lg font-bold text-gray-800">我的訂單</h1>
+        
+        <div class="w-10 h-10"></div> <!-- Spacer -->
+    </header>
+
+    <!-- Spacer -->
+    <div class="h-[56px]"></div>
+
+    <!-- Order Status Tabs -->
+    <div class="bg-white py-3 shadow-sm sticky top-[56px] z-40">
+        <div class="flex overflow-x-auto hide-scroll px-4 gap-2">
+            <button onclick="filterOrders('all')" 
+                    class="status-tab whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-kd text-white">
+                全部
+            </button>
+            <button onclick="filterOrders('pending')" 
+                    class="status-tab whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-gray-100 text-gray-600">
+                待確認
+            </button>
+            <button onclick="filterOrders('confirmed')" 
+                    class="status-tab whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-gray-100 text-gray-600">
+                處理中
+            </button>
+            <button onclick="filterOrders('shipping')" 
+                    class="status-tab whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-gray-100 text-gray-600">
+                配送中
+            </button>
+            <button onclick="filterOrders('completed')" 
+                    class="status-tab whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 bg-gray-100 text-gray-600">
+                已完成
+            </button>
+        </div>
+    </div>
+
+    <!-- Orders Content -->
+    <div class="px-4 py-4">
+        <!-- Empty Orders State -->
+        <div id="emptyOrders" class="text-center py-20 hidden">
+            <i class="fas fa-clipboard-list text-6xl text-gray-300 empty-orders-icon mb-4"></i>
+            <h2 class="text-xl font-bold text-gray-500 mb-2">尚無訂單</h2>
+            <p class="text-gray-400 mb-6">快去選購您需要的材料吧！</p>
+            <button onclick="goToHome()" class="bg-kd text-white px-6 py-3 rounded-lg font-medium">
+                前往購物
+            </button>
+        </div>
+
+        <!-- Orders List -->
+        <div id="ordersList" class="space-y-3">
+            <!-- Orders will be injected here -->
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 pb-safe z-50 h-[60px] flex justify-around items-center">
+        <a href="index.html" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[10px]">首頁</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd">
+            <i class="fas fa-th-large text-lg"></i>
+            <span class="text-[10px]">分類</span>
+        </a>
+        
+        <!-- Center Action Button (Orders) -->
+        <a href="#" class="flex flex-col items-center gap-1 text-kd w-1/5 relative">
+            <div class="absolute -top-6 bg-kd w-12 h-12 rounded-full border-4 border-gray-100 flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-clipboard-list text-xl"></i>
+            </div>
+            <span class="text-[10px] mt-7">查訂單</span>
+        </a>
+
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd">
+            <i class="fas fa-comment-alt text-lg"></i>
+            <span class="text-[10px]">聯絡業務</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd">
+            <i class="fas fa-user text-lg"></i>
+            <span class="text-[10px]">會員</span>
+        </a>
+    </nav>
+
+    <script>
+        let allOrders = [];
+        let currentFilter = 'all';
+
+        // Load orders from localStorage
+        function loadOrders() {
+            const savedOrders = localStorage.getItem('kd-orders');
+            allOrders = savedOrders ? JSON.parse(savedOrders) : [];
+            
+            // Sort orders by date (newest first)
+            allOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+            
+            renderOrders();
+        }
+
+        // Filter orders by status
+        function filterOrders(status) {
+            currentFilter = status;
+            
+            // Update tab styles
+            document.querySelectorAll('.status-tab').forEach(tab => {
+                tab.classList.remove('bg-kd', 'text-white');
+                tab.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            event.target.classList.remove('bg-gray-100', 'text-gray-600');
+            event.target.classList.add('bg-kd', 'text-white');
+            
+            renderOrders();
+        }
+
+        // Render orders list
+        function renderOrders() {
+            const ordersList = document.getElementById('ordersList');
+            const emptyOrders = document.getElementById('emptyOrders');
+            
+            let filteredOrders = allOrders;
+            if (currentFilter !== 'all') {
+                filteredOrders = allOrders.filter(order => order.status === currentFilter);
+            }
+
+            if (filteredOrders.length === 0) {
+                ordersList.classList.add('hidden');
+                emptyOrders.classList.remove('hidden');
+                return;
+            }
+
+            ordersList.classList.remove('hidden');
+            emptyOrders.classList.add('hidden');
+
+            ordersList.innerHTML = filteredOrders.map(order => {
+                const statusInfo = getStatusInfo(order.status);
+                const orderDate = new Date(order.orderDate);
+                const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
+                return `
+                    <div class="bg-white rounded-lg card-shadow p-4 cursor-pointer active:scale-[0.99] transition-transform duration-100"
+                         onclick="viewOrderDetail('${order.orderId}')">
+                        <!-- Order Header -->
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-bold text-gray-800">訂單編號：${order.orderId}</span>
+                                    <span class="text-xs ${statusInfo.color} font-medium px-2 py-1 bg-gray-50 rounded-full">
+                                        ${statusInfo.text}
+                                    </span>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    ${orderDate.toLocaleDateString('zh-TW', { 
+                                        year: 'numeric', 
+                                        month: '2-digit', 
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+
+                        <!-- Order Items Preview -->
+                        <div class="space-y-2 mb-3">
+                            ${order.items.slice(0, 2).map(item => `
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-gray-800 truncate">${item.name}</div>
+                                        <div class="text-xs text-gray-500">數量：${item.quantity}</div>
+                                    </div>
+                                    <div class="text-sm font-bold text-gray-800">
+                                        NT$${(item.price * item.quantity).toLocaleString()}
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${order.items.length > 2 ? `
+                                <div class="text-xs text-gray-500 text-center">
+                                    還有 ${order.items.length - 2} 項商品...
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="border-t border-gray-100 pt-3 flex justify-between items-center">
+                            <div class="text-sm text-gray-600">
+                                共 ${itemCount} 件商品
+                            </div>
+                            <div class="text-lg font-bold text-kd">
+                                總計 NT$${order.total.toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get status display info
+        function getStatusInfo(status) {
+            const statusMap = {
+                'pending': { text: '待確認', color: 'status-pending' },
+                'confirmed': { text: '處理中', color: 'status-confirmed' },
+                'shipping': { text: '配送中', color: 'status-shipping' },
+                'completed': { text: '已完成', color: 'status-completed' },
+                'cancelled': { text: '已取消', color: 'status-cancelled' }
+            };
+            return statusMap[status] || { text: '未知', color: 'text-gray-500' };
+        }
+
+        // View order detail
+        function viewOrderDetail(orderId) {
+            window.location.href = `order-detail.html?id=${orderId}`;
+        }
+
+        // Navigation
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // Hide scrollbar CSS for tabs
+        const style = document.createElement('style');
+        style.textContent = `
+            .hide-scroll::-webkit-scrollbar {
+                display: none;
+            }
+            .hide-scroll {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders();
+        });
+    </script>
+</body>
+</html>
