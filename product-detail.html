@@ -40,6 +40,10 @@
             display: none;
         }
         
+        .share-overlay.show {
+            display: flex;
+        }
+        
         .share-dialog {
             transform: translateY(0);
             max-width: 100%;
@@ -197,7 +201,7 @@
     </div>
 
     <!-- Share Dialog -->
-    <div id="shareOverlay" class="fixed inset-0 z-[9999] share-overlay flex items-end">
+    <div id="shareOverlay" class="fixed inset-0 z-[9999] share-overlay items-end">
         <div class="share-dialog w-full bg-white rounded-t-2xl shadow-xl">
             <!-- Dialog Header -->
             <div class="flex items-center justify-between p-4 border-b border-gray-100">
@@ -512,9 +516,9 @@
                 console.log('🔍 找到的 overlay 元素:', overlay);
                 
                 if (overlay) {
-                    // 使用簡單的 display 切換而不是複雜的 CSS 類
-                    overlay.style.display = 'flex';
-                    console.log('✅ 對話框已顯示 (display: flex)');
+                    // 使用 CSS 類別切換
+                    overlay.classList.add('show');
+                    console.log('✅ 對話框已顯示 (添加 show 類別)');
                     
                     // 阻止背景滾動
                     document.body.style.overflow = 'hidden';
@@ -523,6 +527,7 @@
                     setTimeout(() => {
                         const computedStyle = window.getComputedStyle(overlay);
                         console.log('🔍 檢查顯示狀態 - display:', computedStyle.display);
+                        console.log('🔍 檢查 CSS 類別:', overlay.classList.toString());
                     }, 100);
                 } else {
                     console.error('❌ 找不到 shareOverlay 元素！');
@@ -536,7 +541,7 @@
             console.log('🔒 執行 closeShareDialog()');
             const overlay = document.getElementById('shareOverlay');
             if (overlay) {
-                overlay.style.display = 'none';
+                overlay.classList.remove('show');
                 document.body.style.overflow = '';
                 console.log('✅ 對話框已關閉');
             }
