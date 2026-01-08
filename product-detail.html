@@ -41,16 +41,19 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
+            pointer-events: none;
         }
         
         .share-overlay.active {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto;
         }
         
         .share-dialog {
             transform: translateY(100%);
             transition: transform 0.3s ease;
+            max-width: 100%;
         }
         
         .share-overlay.active .share-dialog {
@@ -207,7 +210,7 @@
     </div>
 
     <!-- Share Dialog -->
-    <div id="shareOverlay" class="fixed inset-0 z-[70] share-overlay flex items-end">
+    <div id="shareOverlay" class="fixed inset-0 z-[9999] share-overlay flex items-end">
         <div class="share-dialog w-full bg-white rounded-t-2xl shadow-xl">
             <!-- Dialog Header -->
             <div class="flex items-center justify-between p-4 border-b border-gray-100">
@@ -515,15 +518,25 @@
 
         // Share functions
         function openShareDialog() {
+            console.log('Opening share dialog...');
             const overlay = document.getElementById('shareOverlay');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent background scroll
+            if (overlay) {
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                console.log('Share dialog opened successfully');
+            } else {
+                console.error('Share overlay not found!');
+            }
         }
 
         function closeShareDialog() {
+            console.log('Closing share dialog...');
             const overlay = document.getElementById('shareOverlay');
-            overlay.classList.remove('active');
-            document.body.style.overflow = ''; // Restore scroll
+            if (overlay) {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                console.log('Share dialog closed successfully');
+            }
         }
 
         function shareToLine() {
