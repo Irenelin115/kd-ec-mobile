@@ -185,8 +185,8 @@
                          onclick="viewOrderDetail('${order.orderId}')">
                         <!-- Order Header -->
                         <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1 flex-wrap">
                                     <span class="font-bold text-gray-800">訂單編號：${order.orderId}</span>
                                     <span class="text-xs ${statusInfo.color} font-medium px-2 py-1 bg-gray-50 rounded-full">
                                         ${statusInfo.text}
@@ -202,7 +202,6 @@
                                     })}
                                 </div>
                             </div>
-                            <i class="fas fa-chevron-right text-gray-400"></i>
                         </div>
 
                         <!-- Order Items Preview -->
