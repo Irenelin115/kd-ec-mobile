@@ -148,7 +148,6 @@
             <!-- Actions -->
             <div class="flex items-center gap-4">
                 <button class="text-gray-600 text-xl"><i class="fas fa-search"></i></button>
-                <button onclick="openShareDialog(event)" class="text-gray-600 text-xl"><i class="fas fa-share-alt"></i></button>
                 <div class="relative cursor-pointer" onclick="alert('進入購物車')">
                     <i class="fas fa-shopping-cart text-xl text-kd"></i>
                     <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white transform scale-0 transition-transform duration-200">0</span>
@@ -240,31 +239,24 @@
         <span>已加入購物車</span>
     </div>
 
-    <!-- Share Dialog -->
-    <div id="shareModal" class="share-overlay">
+    <!-- Share Dialog (隱藏，首頁不使用) -->
+    <!-- <div id="shareModal" class="share-overlay" style="display: none;">
         <div class="share-dialog">
-            <div class="share-header">
-                分享給您的家人朋友！
-            </div>
-            
+            <div class="share-header">分享給您的家人朋友！</div>
             <div class="share-buttons">
                 <div class="share-btn" onclick="shareToLine(event)">
                     <div class="share-btn-icon line-btn">📱</div>
                     <div>Line</div>
                 </div>
-                
                 <div class="share-btn" onclick="copyLink(event)">
                     <div class="share-btn-icon copy-btn">🔗</div>
                     <div>複製連結</div>
                 </div>
             </div>
-            
             <button class="close-btn" onclick="closeShareDialog(event)">取消</button>
         </div>
     </div>
-
-    <!-- Share Toast -->
-    <div id="shareToast" class="share-toast"></div>
+    <div id="shareToast" class="share-toast"></div> -->
 
     <!-- Javascript -->
     <script>
