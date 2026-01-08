@@ -34,30 +34,17 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        /* Share Dialog Styles */
+        /* Share Dialog Styles - Simple Version */
         .share-overlay {
             background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        
-        .share-overlay.active {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
+            display: none;
         }
         
         .share-dialog {
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            max-width: 100%;
-        }
-        
-        .share-overlay.active .share-dialog {
             transform: translateY(0);
+            max-width: 100%;
+            background: white;
+            margin-top: auto;
         }
         
         /* Share button animations */
@@ -516,26 +503,42 @@
                   '業務會立即回覆報價！');
         }
 
-        // Share functions
+        // Share functions - Fixed version
         function openShareDialog() {
-            console.log('Opening share dialog...');
-            const overlay = document.getElementById('shareOverlay');
-            if (overlay) {
-                overlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-                console.log('Share dialog opened successfully');
-            } else {
-                console.error('Share overlay not found!');
+            console.log('🚀 開始執行 openShareDialog()');
+            
+            try {
+                const overlay = document.getElementById('shareOverlay');
+                console.log('🔍 找到的 overlay 元素:', overlay);
+                
+                if (overlay) {
+                    // 使用簡單的 display 切換而不是複雜的 CSS 類
+                    overlay.style.display = 'flex';
+                    console.log('✅ 對話框已顯示 (display: flex)');
+                    
+                    // 阻止背景滾動
+                    document.body.style.overflow = 'hidden';
+                    
+                    // 檢查顯示狀態
+                    setTimeout(() => {
+                        const computedStyle = window.getComputedStyle(overlay);
+                        console.log('🔍 檢查顯示狀態 - display:', computedStyle.display);
+                    }, 100);
+                } else {
+                    console.error('❌ 找不到 shareOverlay 元素！');
+                }
+            } catch (error) {
+                console.error('💥 openShareDialog() 發生錯誤:', error);
             }
         }
 
         function closeShareDialog() {
-            console.log('Closing share dialog...');
+            console.log('🔒 執行 closeShareDialog()');
             const overlay = document.getElementById('shareOverlay');
             if (overlay) {
-                overlay.classList.remove('active');
+                overlay.style.display = 'none';
                 document.body.style.overflow = '';
-                console.log('Share dialog closed successfully');
+                console.log('✅ 對話框已關閉');
             }
         }
 
@@ -604,15 +607,15 @@
             }, 2000);
         }
 
-        // Close dialog when clicking outside
-        document.addEventListener('click', (e) => {
-            const overlay = document.getElementById('shareOverlay');
-            const dialog = overlay.querySelector('.share-dialog');
-            
-            if (overlay.classList.contains('active') && !dialog.contains(e.target)) {
-                closeShareDialog();
-            }
-        });
+        // Close dialog when clicking outside - 暫時移除以避免衝突
+        // document.addEventListener('click', (e) => {
+        //     const overlay = document.getElementById('shareOverlay');
+        //     const dialog = overlay.querySelector('.share-dialog');
+        //     
+        //     if (overlay.style.display === 'flex' && !dialog.contains(e.target)) {
+        //         closeShareDialog();
+        //     }
+        // });
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
