@@ -174,40 +174,6 @@
             transform: scale(1.2);
         }
         
-        .banner-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.3);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-        
-        .banner-nav:hover {
-            background: rgba(0, 0, 0, 0.5);
-        }
-        
-        .banner-nav.prev {
-            left: 12px;
-        }
-        
-        .banner-nav.next {
-            right: 12px;
-        }
-        
-        .text-shadow {
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -244,19 +210,11 @@
 
     <!-- 2. Banner Carousel -->
     <div class="px-4 py-3">
-        <div class="w-full h-32 rounded-xl shadow-lg banner-carousel">
+        <div class="w-full h-32 shadow-lg banner-carousel">
             <!-- Banner slides container -->
             <div class="banner-slides" id="bannerSlides">
                 <!-- Banner slides will be injected here -->
             </div>
-            
-            <!-- Navigation arrows -->
-            <button class="banner-nav prev" onclick="previousSlide()">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="banner-nav next" onclick="nextSlide()">
-                <i class="fas fa-chevron-right"></i>
-            </button>
             
             <!-- Indicators -->
             <div class="banner-indicators" id="bannerIndicators">
@@ -718,42 +676,27 @@
             {
                 id: 1,
                 image: '商品圖片/Banner1.jpg',
-                title: 'APP 下單享優惠',
-                subtitle: '綜合材料 滿千免運',
-                buttonText: '立即選購',
-                link: '#'
+                alt: '科定企業廣告1'
             },
             {
                 id: 2,
                 image: '商品圖片/Banner2.jpg',
-                title: '專業工具組合',
-                subtitle: '一次購齊 施工無憂',
-                buttonText: '查看詳情',
-                link: '#'
+                alt: '科定企業廣告2'
             },
             {
                 id: 3,
                 image: '商品圖片/Banner3.jpg',
-                title: '品質保證',
-                subtitle: '科定材料 值得信賴',
-                buttonText: '了解更多',
-                link: '#'
+                alt: '科定企業廣告3'
             },
             {
                 id: 4,
                 image: '商品圖片/Banner4.jpg',
-                title: '快速配送',
-                subtitle: '2-3日送達 方便快捷',
-                buttonText: '立即體驗',
-                link: '#'
+                alt: '科定企業廣告4'
             },
             {
                 id: 5,
                 image: '商品圖片/Banner5.jpg',
-                title: '會員專屬',
-                subtitle: '註冊享更多優惠',
-                buttonText: '加入會員',
-                link: '#'
+                alt: '科定企業廣告5'
             }
         ];
 
@@ -765,29 +708,18 @@
             const slidesContainer = document.getElementById('bannerSlides');
             const indicatorsContainer = document.getElementById('bannerIndicators');
 
-            // Render slides
+            // Render slides - clean images without overlays
             slidesContainer.innerHTML = banners.map(banner => `
-                <div class="banner-slide w-full h-32 relative rounded-xl overflow-hidden">
-                    <img src="${banner.image}" alt="${banner.title}" 
+                <div class="banner-slide w-full h-32 relative overflow-hidden">
+                    <img src="${banner.image}" alt="${banner.alt}" 
                          class="w-full h-full object-cover" 
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     
                     <!-- Fallback content if image fails to load -->
-                    <div class="w-full h-full bg-gradient-to-r from-gray-800 to-gray-900 flex items-center justify-between px-6 text-white" style="display: none;">
-                        <div class="z-10">
-                            <h2 class="text-lg font-bold mb-1">${banner.title}</h2>
-                            <p class="text-sm text-gray-300">${banner.subtitle}</p>
-                            <button class="mt-2 bg-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full">${banner.buttonText}</button>
-                        </div>
-                        <i class="fas fa-tools text-6xl text-white opacity-10"></i>
-                    </div>
-                    
-                    <!-- Text overlay on image -->
-                    <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-between px-6 text-white">
-                        <div class="z-10">
-                            <h2 class="text-lg font-bold mb-1 text-shadow">${banner.title}</h2>
-                            <p class="text-sm text-gray-100 text-shadow">${banner.subtitle}</p>
-                            <button class="mt-2 bg-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full hover:bg-yellow-400 transition-colors">${banner.buttonText}</button>
+                    <div class="w-full h-full bg-gradient-to-r from-gray-800 to-gray-900 flex items-center justify-center text-white" style="display: none;">
+                        <div class="text-center">
+                            <i class="fas fa-tools text-4xl mb-2 opacity-50"></i>
+                            <p class="text-sm">載入中...</p>
                         </div>
                     </div>
                 </div>
@@ -811,14 +743,6 @@
         // Next slide
         function nextSlide() {
             currentSlide = (currentSlide + 1) % banners.length;
-            updateCarousel();
-            updateIndicators();
-            resetAutoSlide();
-        }
-
-        // Previous slide
-        function previousSlide() {
-            currentSlide = (currentSlide - 1 + banners.length) % banners.length;
             updateCarousel();
             updateIndicators();
             resetAutoSlide();
