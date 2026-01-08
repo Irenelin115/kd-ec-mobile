@@ -148,7 +148,7 @@
             <!-- Actions -->
             <div class="flex items-center gap-4">
                 <button class="text-gray-600 text-xl"><i class="fas fa-search"></i></button>
-                <button onclick="openShareDialog()" class="text-gray-600 text-xl"><i class="fas fa-share-alt"></i></button>
+                <button onclick="openShareDialog(event)" class="text-gray-600 text-xl"><i class="fas fa-share-alt"></i></button>
                 <div class="relative cursor-pointer" onclick="alert('進入購物車')">
                     <i class="fas fa-shopping-cart text-xl text-kd"></i>
                     <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white transform scale-0 transition-transform duration-200">0</span>
@@ -248,18 +248,18 @@
             </div>
             
             <div class="share-buttons">
-                <div class="share-btn" onclick="shareToLine()">
+                <div class="share-btn" onclick="shareToLine(event)">
                     <div class="share-btn-icon line-btn">📱</div>
                     <div>Line</div>
                 </div>
                 
-                <div class="share-btn" onclick="copyLink()">
+                <div class="share-btn" onclick="copyLink(event)">
                     <div class="share-btn-icon copy-btn">🔗</div>
                     <div>複製連結</div>
                 </div>
             </div>
             
-            <button class="close-btn" onclick="closeShareDialog()">取消</button>
+            <button class="close-btn" onclick="closeShareDialog(event)">取消</button>
         </div>
     </div>
 
@@ -469,8 +469,15 @@
         }
 
         // Share functions - Fixed version
-        function openShareDialog() {
+        function openShareDialog(event) {
             console.log('🚀 開始執行 openShareDialog()');
+            
+            // 阻止事件冒泡
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('🛑 事件冒泡已阻止');
+            }
             
             try {
                 const modal = document.getElementById('shareModal');
@@ -481,6 +488,13 @@
                     modal.classList.add('show');
                     console.log('✅ show class 已添加');
                     console.log('📝 目前的 classList:', modal.classList.toString());
+                    
+                    // 等一下再檢查是否真的顯示
+                    setTimeout(() => {
+                        const computedStyle = window.getComputedStyle(modal);
+                        console.log('🔍 檢查顯示狀態 - display:', computedStyle.display);
+                        console.log('🔍 檢查顯示狀態 - visibility:', computedStyle.visibility);
+                    }, 100);
                 } else {
                     console.error('❌ 找不到 shareModal 元素！');
                 }
@@ -489,8 +503,13 @@
             }
         }
 
-        function closeShareDialog() {
+        function closeShareDialog(event) {
             console.log('🔒 執行 closeShareDialog()');
+            
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             
             const modal = document.getElementById('shareModal');
             if (modal) {
@@ -499,7 +518,12 @@
             }
         }
 
-        function shareToLine() {
+        function shareToLine(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
             const url = window.location.href;
             const text = '科定企業行動下單平台\n專業裝修材料，品質保證';
             const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
@@ -510,7 +534,12 @@
             showShareToast('已分享到 LINE');
         }
 
-        function copyLink() {
+        function copyLink(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
             const url = window.location.href;
             console.log('📋 複製連結:', url);
             
