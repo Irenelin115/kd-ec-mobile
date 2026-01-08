@@ -133,6 +133,81 @@
             display: none;
             z-index: 10000;
         }
+
+        /* Banner Carousel Styles */
+        .banner-carousel {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .banner-slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .banner-slide {
+            min-width: 100%;
+            position: relative;
+        }
+        
+        .banner-indicators {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .banner-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .banner-indicator.active {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.2);
+        }
+        
+        .banner-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .banner-nav:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .banner-nav.prev {
+            left: 12px;
+        }
+        
+        .banner-nav.next {
+            right: 12px;
+        }
+        
+        .text-shadow {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -167,16 +242,26 @@
     <!-- Spacer for Header -->
     <div class="h-[108px]"></div>
 
-    <!-- 2. Banner Area -->
+    <!-- 2. Banner Carousel -->
     <div class="px-4 py-3">
-        <div class="w-full h-32 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl flex items-center justify-between px-6 text-white shadow-lg relative overflow-hidden">
-            <div class="z-10">
-                <h2 class="text-lg font-bold mb-1">APP 下單享優惠</h2>
-                <p class="text-sm text-gray-300">綜合材料 滿千免運</p>
-                <button class="mt-2 bg-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full">立即選購</button>
+        <div class="w-full h-32 rounded-xl shadow-lg banner-carousel">
+            <!-- Banner slides container -->
+            <div class="banner-slides" id="bannerSlides">
+                <!-- Banner slides will be injected here -->
             </div>
-            <!-- Decorative Icon -->
-            <i class="fas fa-tools text-6xl text-white opacity-10 absolute -right-2 -bottom-4"></i>
+            
+            <!-- Navigation arrows -->
+            <button class="banner-nav prev" onclick="previousSlide()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="banner-nav next" onclick="nextSlide()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- Indicators -->
+            <div class="banner-indicators" id="bannerIndicators">
+                <!-- Indicators will be injected here -->
+            </div>
         </div>
     </div>
 
@@ -628,11 +713,163 @@
             }, 2000);
         }
 
+        // Banner Carousel Data
+        const banners = [
+            {
+                id: 1,
+                image: '商品圖片/Banner1.jpg',
+                title: 'APP 下單享優惠',
+                subtitle: '綜合材料 滿千免運',
+                buttonText: '立即選購',
+                link: '#'
+            },
+            {
+                id: 2,
+                image: '商品圖片/Banner2.jpg',
+                title: '專業工具組合',
+                subtitle: '一次購齊 施工無憂',
+                buttonText: '查看詳情',
+                link: '#'
+            },
+            {
+                id: 3,
+                image: '商品圖片/Banner3.jpg',
+                title: '品質保證',
+                subtitle: '科定材料 值得信賴',
+                buttonText: '了解更多',
+                link: '#'
+            },
+            {
+                id: 4,
+                image: '商品圖片/Banner4.jpg',
+                title: '快速配送',
+                subtitle: '2-3日送達 方便快捷',
+                buttonText: '立即體驗',
+                link: '#'
+            },
+            {
+                id: 5,
+                image: '商品圖片/Banner5.jpg',
+                title: '會員專屬',
+                subtitle: '註冊享更多優惠',
+                buttonText: '加入會員',
+                link: '#'
+            }
+        ];
+
+        let currentSlide = 0;
+        let bannerInterval = null;
+
+        // Render Banner Carousel
+        function renderBannerCarousel() {
+            const slidesContainer = document.getElementById('bannerSlides');
+            const indicatorsContainer = document.getElementById('bannerIndicators');
+
+            // Render slides
+            slidesContainer.innerHTML = banners.map(banner => `
+                <div class="banner-slide w-full h-32 relative rounded-xl overflow-hidden">
+                    <img src="${banner.image}" alt="${banner.title}" 
+                         class="w-full h-full object-cover" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    
+                    <!-- Fallback content if image fails to load -->
+                    <div class="w-full h-full bg-gradient-to-r from-gray-800 to-gray-900 flex items-center justify-between px-6 text-white" style="display: none;">
+                        <div class="z-10">
+                            <h2 class="text-lg font-bold mb-1">${banner.title}</h2>
+                            <p class="text-sm text-gray-300">${banner.subtitle}</p>
+                            <button class="mt-2 bg-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full">${banner.buttonText}</button>
+                        </div>
+                        <i class="fas fa-tools text-6xl text-white opacity-10"></i>
+                    </div>
+                    
+                    <!-- Text overlay on image -->
+                    <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-between px-6 text-white">
+                        <div class="z-10">
+                            <h2 class="text-lg font-bold mb-1 text-shadow">${banner.title}</h2>
+                            <p class="text-sm text-gray-100 text-shadow">${banner.subtitle}</p>
+                            <button class="mt-2 bg-yellow-500 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full hover:bg-yellow-400 transition-colors">${banner.buttonText}</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render indicators
+            indicatorsContainer.innerHTML = banners.map((_, index) => `
+                <div class="banner-indicator ${index === 0 ? 'active' : ''}" 
+                     onclick="goToSlide(${index})"></div>
+            `).join('');
+        }
+
+        // Go to specific slide
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            updateCarousel();
+            updateIndicators();
+            resetAutoSlide();
+        }
+
+        // Next slide
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % banners.length;
+            updateCarousel();
+            updateIndicators();
+            resetAutoSlide();
+        }
+
+        // Previous slide
+        function previousSlide() {
+            currentSlide = (currentSlide - 1 + banners.length) % banners.length;
+            updateCarousel();
+            updateIndicators();
+            resetAutoSlide();
+        }
+
+        // Update carousel position
+        function updateCarousel() {
+            const slidesContainer = document.getElementById('bannerSlides');
+            const translateX = -currentSlide * 100;
+            slidesContainer.style.transform = `translateX(${translateX}%)`;
+        }
+
+        // Update indicators
+        function updateIndicators() {
+            const indicators = document.querySelectorAll('.banner-indicator');
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        // Auto slide functionality
+        function startAutoSlide() {
+            bannerInterval = setInterval(() => {
+                nextSlide();
+            }, 4000); // Change slide every 4 seconds
+        }
+
+        function resetAutoSlide() {
+            clearInterval(bannerInterval);
+            startAutoSlide();
+        }
+
+        function stopAutoSlide() {
+            clearInterval(bannerInterval);
+        }
+
+        // Pause auto-slide when hovering
+        function setupBannerEvents() {
+            const carousel = document.querySelector('.banner-carousel');
+            carousel.addEventListener('mouseenter', stopAutoSlide);
+            carousel.addEventListener('mouseleave', startAutoSlide);
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderCategories();
             renderProducts();
             updateCartBadgeFromStorage();
+            renderBannerCarousel();
+            setupBannerEvents();
+            startAutoSlide();
             console.log('🚀 首頁載入完成');
         });
 
