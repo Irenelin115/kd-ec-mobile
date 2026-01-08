@@ -174,6 +174,38 @@
             transform: scale(1.2);
         }
         
+        /* Out of Stock Styles */
+        .product-out-of-stock {
+            position: relative;
+        }
+        
+        .product-out-of-stock .product-image {
+            filter: grayscale(0.7) brightness(0.8);
+        }
+        
+        .stock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .stock-badge {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            transform: rotate(-15deg);
+        }
+        
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -323,7 +355,8 @@
                 price: 85,
                 originalPrice: null,
                 image: '商品圖片/修邊蠟筆.png',
-                tag: '熱銷'
+                tag: '熱銷',
+                outOfStock: true
             },
             {
                 id: 3,
@@ -437,11 +470,16 @@
             countLabel.innerText = filtered.length;
 
             grid.innerHTML = filtered.map(product => `
-                <div onclick="openProductDetail(${product.id})" class="bg-white rounded-lg card-shadow overflow-hidden flex flex-col h-full active:scale-[0.98] transition-transform duration-100 cursor-pointer">
+                <div onclick="${product.outOfStock ? '' : `openProductDetail(${product.id})`}" class="bg-white rounded-lg card-shadow overflow-hidden flex flex-col h-full active:scale-[0.98] transition-transform duration-100 cursor-pointer ${product.outOfStock ? 'product-out-of-stock' : ''}">
                     <div class="relative w-full h-40 bg-gray-200 flex items-center justify-center overflow-hidden">
                         <!-- Real Product Image -->
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
-                        ${product.tag ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded shadow">${product.tag}</span>` : ''}
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover product-image">
+                        ${product.tag && !product.outOfStock ? `<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded shadow">${product.tag}</span>` : ''}
+                        ${product.outOfStock ? `
+                            <div class="stock-overlay">
+                                <span class="stock-badge">補貨中</span>
+                            </div>
+                        ` : ''}
                     </div>
                     
                     <div class="p-3 flex flex-col flex-grow">
@@ -454,10 +492,10 @@
                             </div>
                             
                             <button 
-                                onclick="addToCart(this)"
-                                class="w-full mt-3 bg-white border border-kd text-kd hover:bg-kd hover:text-white py-2 rounded font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-1">
-                                <i class="fas fa-cart-plus"></i>
-                                加入購物車
+                                onclick="${product.outOfStock ? 'notifyWhenAvailable(this)' : 'addToCart(this)'}"
+                                class="w-full mt-3 ${product.outOfStock ? 'bg-gray-100 border border-gray-300 text-gray-600' : 'bg-white border border-kd text-kd hover:bg-kd hover:text-white'} py-2 rounded font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-1">
+                                <i class="${product.outOfStock ? 'fas fa-bell' : 'fas fa-cart-plus'}"></i>
+                                ${product.outOfStock ? '到貨通知我' : '加入購物車'}
                             </button>
                         </div>
                     </div>
@@ -832,6 +870,70 @@
             const searchInput = document.getElementById('searchInput');
             searchInput.focus();
             searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // Notify when product is available
+        function notifyWhenAvailable(btn) {
+            // Get product ID from button's parent card
+            const productCard = btn.closest('[onclick*="openProductDetail"], .product-out-of-stock');
+            if (!productCard) return;
+            
+            // Get product info for notification
+            const productName = productCard.querySelector('h4').textContent;
+            
+            // Store notification request in localStorage
+            const notifications = JSON.parse(localStorage.getItem('kd-stock-notifications') || '[]');
+            const newNotification = {
+                productName: productName,
+                email: 'user@example.com', // In real app, get from user profile
+                requestDate: new Date().toISOString()
+            };
+            
+            // Check if already subscribed
+            const existingNotification = notifications.find(n => n.productName === productName);
+            if (existingNotification) {
+                showNotificationToast('您已經訂閱過此商品的到貨通知');
+                return;
+            }
+            
+            notifications.push(newNotification);
+            localStorage.setItem('kd-stock-notifications', JSON.stringify(notifications));
+            
+            // UI Feedback
+            const originalText = btn.innerHTML;
+            btn.classList.add('bg-green-100', 'border-green-300', 'text-green-600');
+            btn.classList.remove('bg-gray-100', 'border-gray-300', 'text-gray-600');
+            btn.innerHTML = '<i class="fas fa-check"></i> 已訂閱通知';
+            
+            setTimeout(() => {
+                btn.classList.remove('bg-green-100', 'border-green-300', 'text-green-600');
+                btn.classList.add('bg-gray-100', 'border-gray-300', 'text-gray-600');
+                btn.innerHTML = originalText;
+            }, 2000);
+            
+            showNotificationToast('已訂閱到貨通知，商品到貨時會通知您');
+        }
+        
+        // Show notification toast
+        function showNotificationToast(message) {
+            const toast = document.getElementById('toast');
+            const toastText = toast.querySelector('span');
+            const toastIcon = toast.querySelector('i');
+            
+            toastText.textContent = message;
+            toastIcon.className = 'fas fa-bell text-blue-400';
+            
+            toast.classList.remove('hidden');
+            toast.classList.add('toast-enter');
+            
+            // Reset after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('hidden');
+                // Reset original toast content
+                toastText.textContent = '已加入購物車';
+                toastIcon.className = 'fas fa-check-circle text-green-400';
+            }, 3000);
         }
 
         // Initialize
