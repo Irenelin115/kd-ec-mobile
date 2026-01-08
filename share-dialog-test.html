@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>分享對話框測試</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        /* KD Brand Colors */
+        .text-kd { color: #003366; }
+        .bg-kd { background-color: #003366; }
+        
+        /* Share Dialog Styles */
+        .share-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+        
+        .share-overlay.active {
+            display: flex !important;
+        }
+        
+        .share-dialog {
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            width: 100%;
+            background: white;
+            margin-top: auto;
+        }
+        
+        .share-overlay.active .share-dialog {
+            transform: translateY(0);
+        }
+        
+        /* Share button animations */
+        .share-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .share-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center justify-center">
+
+    <!-- 測試頁面內容 -->
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-kd mb-4">分享對話框測試頁面</h1>
+        <p class="text-gray-600 mb-6">點擊下方按鈕測試分享功能</p>
+        
+        <!-- 測試按鈕 -->
+        <button onclick="openShareDialog()" class="bg-kd text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-800 transition-colors">
+            <i class="fas fa-share-alt mr-2"></i>
+            開啟分享對話框
+        </button>
+        
+        <div class="mt-4 text-sm text-gray-500">
+            模擬商品：修邊筆 - NT$60
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-lg text-sm shadow-lg hidden z-[60] flex items-center gap-3 w-max">
+        <i class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toastMsg">已加入購物車</span>
+    </div>
+
+    <!-- Share Dialog -->
+    <div id="shareOverlay" class="fixed inset-0 z-[9999] share-overlay flex items-end">
+        <div class="share-dialog w-full bg-white rounded-t-2xl shadow-xl">
+            <!-- Dialog Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800">分享給您的家人朋友！</h3>
+                <button onclick="closeShareDialog()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 active:bg-gray-100 rounded-full">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Share Options -->
+            <div class="p-6">
+                <!-- Main share buttons -->
+                <div class="flex justify-center gap-4 mb-6">
+                    <div class="text-center">
+                        <button onclick="shareToLine()" class="share-btn w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mb-2 shadow-lg hover:bg-green-600">
+                            <i class="fab fa-line text-2xl"></i>
+                        </button>
+                        <span class="text-xs text-gray-600">Line</span>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button onclick="copyLink()" class="share-btn w-16 h-16 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center mb-2 shadow-lg hover:bg-gray-200">
+                            <i class="fas fa-link text-xl"></i>
+                        </button>
+                        <span class="text-xs text-gray-600">複製連結</span>
+                    </div>
+                </div>
+                
+                <!-- Close button -->
+                <button onclick="closeShareDialog()" class="w-full py-3 text-gray-600 text-sm font-medium border-t border-gray-100 bg-gray-50 rounded-b-2xl hover:bg-gray-100 transition-colors">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模擬商品數據
+        const testProduct = {
+            name: '修邊筆',
+            price: 60,
+            description: '便攜式修邊筆，適合小範圍補色修飾'
+        };
+
+        // Share functions
+        function openShareDialog() {
+            console.log('Opening share dialog...');
+            const overlay = document.getElementById('shareOverlay');
+            if (overlay) {
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                console.log('Share dialog opened successfully');
+            } else {
+                console.error('Share overlay not found!');
+            }
+        }
+
+        function closeShareDialog() {
+            console.log('Closing share dialog...');
+            const overlay = document.getElementById('shareOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                console.log('Share dialog closed successfully');
+            }
+        }
+
+        function shareToLine() {
+            const url = window.location.href;
+            const text = `${testProduct.name} - NT$${testProduct.price.toLocaleString()}\n${testProduct.description}`;
+            const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+            
+            try {
+                window.open(lineUrl, '_blank');
+                closeShareDialog();
+                showShareToast('已分享到 LINE');
+            } catch (error) {
+                showShareToast('無法開啟 LINE 分享');
+            }
+        }
+
+        function copyLink() {
+            const url = window.location.href;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    closeShareDialog();
+                    showShareToast('連結已複製到剪貼板');
+                }).catch(() => {
+                    fallbackCopyText(url);
+                });
+            } else {
+                fallbackCopyText(url);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                closeShareDialog();
+                showShareToast('連結已複製到剪貼板');
+            } catch (error) {
+                closeShareDialog();
+                showShareToast('無法複製連結');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showShareToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+
+        // Close dialog when clicking outside
+        document.addEventListener('click', (e) => {
+            const overlay = document.getElementById('shareOverlay');
+            const dialog = overlay.querySelector('.share-dialog');
+            
+            if (overlay.classList.contains('active') && !dialog.contains(e.target)) {
+                closeShareDialog();
+            }
+        });
+
+        // Add some debug info to page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Share dialog test page loaded');
+            console.log('Share overlay element:', document.getElementById('shareOverlay'));
+        });
+    </script>
+</body>
+</html>

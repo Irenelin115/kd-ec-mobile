@@ -45,6 +45,94 @@
         .toast-enter {
             animation: slideUpFade 0.3s ease-out forwards;
         }
+
+        /* Share Dialog Styles - Fixed Version */
+        .share-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: none;
+        }
+        
+        .share-overlay.show {
+            display: block;
+        }
+        
+        .share-dialog {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            min-height: 200px;
+        }
+        
+        .share-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .share-btn {
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+        }
+        
+        .share-btn-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin: 0 auto 8px auto;
+        }
+        
+        .line-btn { background: #00C300; }
+        .copy-btn { background: #666; }
+        
+        .close-btn {
+            width: 100%;
+            padding: 15px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .share-toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 10000;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -60,6 +148,7 @@
             <!-- Actions -->
             <div class="flex items-center gap-4">
                 <button class="text-gray-600 text-xl"><i class="fas fa-search"></i></button>
+                <button onclick="openShareDialog()" class="text-gray-600 text-xl"><i class="fas fa-share-alt"></i></button>
                 <div class="relative cursor-pointer" onclick="alert('進入購物車')">
                     <i class="fas fa-shopping-cart text-xl text-kd"></i>
                     <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white transform scale-0 transition-transform duration-200">0</span>
@@ -150,6 +239,32 @@
         <i class="fas fa-check-circle text-green-400"></i>
         <span>已加入購物車</span>
     </div>
+
+    <!-- Share Dialog -->
+    <div id="shareModal" class="share-overlay">
+        <div class="share-dialog">
+            <div class="share-header">
+                分享給您的家人朋友！
+            </div>
+            
+            <div class="share-buttons">
+                <div class="share-btn" onclick="shareToLine()">
+                    <div class="share-btn-icon line-btn">📱</div>
+                    <div>Line</div>
+                </div>
+                
+                <div class="share-btn" onclick="copyLink()">
+                    <div class="share-btn-icon copy-btn">🔗</div>
+                    <div>複製連結</div>
+                </div>
+            </div>
+            
+            <button class="close-btn" onclick="closeShareDialog()">取消</button>
+        </div>
+    </div>
+
+    <!-- Share Toast -->
+    <div id="shareToast" class="share-toast"></div>
 
     <!-- Javascript -->
     <script>
@@ -353,10 +468,98 @@
             window.location.href = `product-detail.html?id=${productId}`;
         }
 
+        // Share functions - Fixed version
+        function openShareDialog() {
+            console.log('🚀 開始執行 openShareDialog()');
+            
+            try {
+                const modal = document.getElementById('shareModal');
+                console.log('🔍 找到的 modal 元素:', modal);
+                
+                if (modal) {
+                    console.log('🎯 準備添加 show class');
+                    modal.classList.add('show');
+                    console.log('✅ show class 已添加');
+                    console.log('📝 目前的 classList:', modal.classList.toString());
+                } else {
+                    console.error('❌ 找不到 shareModal 元素！');
+                }
+            } catch (error) {
+                console.error('💥 openShareDialog() 發生錯誤:', error);
+            }
+        }
+
+        function closeShareDialog() {
+            console.log('🔒 執行 closeShareDialog()');
+            
+            const modal = document.getElementById('shareModal');
+            if (modal) {
+                modal.classList.remove('show');
+                console.log('✅ 對話框已關閉');
+            }
+        }
+
+        function shareToLine() {
+            const url = window.location.href;
+            const text = '科定企業行動下單平台\n專業裝修材料，品質保證';
+            const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+            
+            console.log('📤 分享到 LINE...');
+            window.open(lineUrl, '_blank');
+            closeShareDialog();
+            showShareToast('已分享到 LINE');
+        }
+
+        function copyLink() {
+            const url = window.location.href;
+            console.log('📋 複製連結:', url);
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    closeShareDialog();
+                    showShareToast('連結已複製到剪貼板');
+                }).catch(() => {
+                    fallbackCopyText(url);
+                });
+            } else {
+                fallbackCopyText(url);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                closeShareDialog();
+                showShareToast('連結已複製到剪貼板');
+            } catch (error) {
+                closeShareDialog();
+                showShareToast('無法複製連結');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showShareToast(message) {
+            const toast = document.getElementById('shareToast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderCategories();
             renderProducts();
+            console.log('🚀 首頁載入完成');
+            console.log('🔍 shareModal 元素:', document.getElementById('shareModal'));
         });
 
     </script>

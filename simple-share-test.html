@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡單分享測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-button {
+            background: #003366;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+        }
+        
+        .test-button:hover {
+            background: #004488;
+        }
+        
+        /* 分享對話框 */
+        .share-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: flex-end;
+        }
+        
+        .share-overlay.show {
+            display: flex;
+        }
+        
+        .share-dialog {
+            width: 100%;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        
+        .share-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .share-btn {
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .share-btn-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .line-btn { background: #00C300; }
+        .copy-btn { background: #666; }
+        
+        .close-btn {
+            width: 100%;
+            padding: 15px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="text-align: center; color: #003366;">分享功能測試頁面</h1>
+
+<button class="test-button" onclick="openDialog()">
+    🔗 開啟分享對話框
+</button>
+
+<div style="text-align: center; margin-top: 20px; color: #666;">
+    <p>測試商品：修邊筆 - NT$60</p>
+    <p>請開啟瀏覽器開發者工具查看 Console 訊息</p>
+</div>
+
+<!-- 分享對話框 -->
+<div id="shareModal" class="share-overlay">
+    <div class="share-dialog">
+        <div class="share-header">
+            <h2>分享給您的家人朋友！</h2>
+        </div>
+        
+        <div class="share-buttons">
+            <div class="share-btn" onclick="shareToLine()">
+                <div class="share-btn-icon line-btn">📱</div>
+                <div>Line</div>
+            </div>
+            
+            <div class="share-btn" onclick="copyLink()">
+                <div class="share-btn-icon copy-btn">🔗</div>
+                <div>複製連結</div>
+            </div>
+        </div>
+        
+        <button class="close-btn" onclick="closeDialog()">取消</button>
+    </div>
+</div>
+
+<!-- 提示訊息 -->
+<div id="toast" class="toast"></div>
+
+<script>
+function openDialog() {
+    console.log('📱 準備開啟分享對話框...');
+    const modal = document.getElementById('shareModal');
+    
+    if (modal) {
+        modal.classList.add('show');
+        console.log('✅ 分享對話框已開啟');
+        console.log('📋 Modal element:', modal);
+        console.log('🎨 Modal classes:', modal.classList.toString());
+    } else {
+        console.error('❌ 找不到分享對話框元素！');
+    }
+}
+
+function closeDialog() {
+    console.log('🔒 關閉分享對話框...');
+    const modal = document.getElementById('shareModal');
+    
+    if (modal) {
+        modal.classList.remove('show');
+        console.log('✅ 分享對話框已關閉');
+    }
+}
+
+function shareToLine() {
+    const url = window.location.href;
+    const text = '修邊筆 - NT$60\n便攜式修邊筆，適合小範圍補色修飾';
+    const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+    
+    console.log('📤 分享到 LINE...');
+    console.log('🔗 LINE URL:', lineUrl);
+    
+    window.open(lineUrl, '_blank');
+    closeDialog();
+    showToast('已分享到 LINE');
+}
+
+function copyLink() {
+    const url = window.location.href;
+    console.log('📋 複製連結:', url);
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            console.log('✅ 連結複製成功');
+            closeDialog();
+            showToast('連結已複製到剪貼板');
+        }).catch(() => {
+            console.log('⚠️ 使用備用複製方法...');
+            fallbackCopy(url);
+        });
+    } else {
+        console.log('⚠️ 瀏覽器不支援 Clipboard API，使用備用方法...');
+        fallbackCopy(url);
+    }
+}
+
+function fallbackCopy(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        console.log('✅ 備用複製成功');
+        closeDialog();
+        showToast('連結已複製到剪貼板');
+    } catch (err) {
+        console.error('❌ 複製失敗:', err);
+        showToast('無法複製連結');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 2000);
+}
+
+// 點擊對話框外部關閉 (延遲綁定避免立即觸發)
+setTimeout(() => {
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('shareModal');
+        const dialog = modal.querySelector('.share-dialog');
+        
+        if (modal.classList.contains('show') && !dialog.contains(e.target)) {
+            console.log('🖱️ 點擊外部區域，關閉對話框');
+            closeDialog();
+        }
+    });
+}, 100);
+
+// 頁面載入完成
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 頁面載入完成');
+    console.log('🔍 分享對話框元素:', document.getElementById('shareModal'));
+});
+</script>
+
+</body>
+</html>
