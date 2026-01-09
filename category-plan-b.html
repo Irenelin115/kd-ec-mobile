@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>商品分類 - 方案B：視覺分類牆 - 科定企業</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            padding-bottom: 80px;
+        }
+        
+        .text-kd { color: #003366; }
+        .bg-kd { background-color: #003366; }
+        .border-kd { border-color: #003366; }
+        
+        .visual-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .visual-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .visual-card:active {
+            transform: scale(1.01);
+        }
+        
+        .visual-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
+            z-index: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .visual-card:hover::before {
+            opacity: 0.7;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .filter-chip {
+            transition: all 0.3s ease;
+        }
+        
+        .filter-chip.active {
+            background: #003366;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .grid-masonry {
+            column-count: 2;
+            column-gap: 12px;
+        }
+        
+        .grid-item {
+            break-inside: avoid;
+            margin-bottom: 12px;
+        }
+        
+        .category-large {
+            height: 240px;
+        }
+        
+        .category-medium {
+            height: 180px;
+        }
+        
+        .category-small {
+            height: 140px;
+        }
+        
+        .trending-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 40;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 h-[56px] flex items-center justify-between px-4">
+        <button onclick="goToHome()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </button>
+        
+        <h1 class="text-lg font-bold text-gray-800">發現材料</h1>
+        
+        <button onclick="toggleSearchMode()" class="w-10 h-10 flex items-center justify-center text-gray-600 active:bg-gray-100 rounded-full">
+            <i class="fas fa-search text-xl"></i>
+        </button>
+    </header>
+
+    <!-- Spacer -->
+    <div class="h-[56px]"></div>
+
+    <!-- Search Mode (Hidden by default) -->
+    <div id="searchMode" class="bg-white py-4 px-4 shadow-sm border-b hidden">
+        <div class="relative">
+            <input type="text" 
+                   id="visualSearch" 
+                   placeholder="輸入材料名稱、顏色、用途..." 
+                   class="w-full bg-gray-50 border border-gray-200 rounded-full py-3 pl-12 pr-10 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                   oninput="handleVisualSearch(event)">
+            <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+            <button onclick="clearSearch()" class="absolute right-3 top-2.5 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-xs hover:bg-gray-300">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Tags -->
+    <div class="bg-white py-3 px-4 shadow-sm">
+        <div class="flex overflow-x-auto gap-2 hide-scroll">
+            <button class="filter-chip whitespace-nowrap px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium active" 
+                    onclick="filterCategories('all')">
+                <i class="fas fa-th-large mr-1"></i>全部分類
+            </button>
+            <button class="filter-chip whitespace-nowrap px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium" 
+                    onclick="filterCategories('trending')">
+                <i class="fas fa-fire mr-1 text-red-500"></i>熱門
+            </button>
+            <button class="filter-chip whitespace-nowrap px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium" 
+                    onclick="filterCategories('new')">
+                <i class="fas fa-star mr-1 text-yellow-500"></i>新品
+            </button>
+            <button class="filter-chip whitespace-nowrap px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium" 
+                    onclick="filterCategories('eco')">
+                <i class="fas fa-leaf mr-1 text-green-500"></i>環保
+            </button>
+            <button class="filter-chip whitespace-nowrap px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium" 
+                    onclick="filterCategories('floor')">
+                <i class="fas fa-home mr-1 text-blue-500"></i>地板
+            </button>
+        </div>
+    </div>
+
+    <!-- Visual Category Grid -->
+    <div class="p-3">
+        <div class="grid-masonry" id="categoryGrid">
+            <!-- Categories will be injected here -->
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="floating-action">
+        <button onclick="showRecommendations()" 
+                class="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform">
+            <i class="fas fa-magic text-xl"></i>
+        </button>
+        <div class="text-center mt-1">
+            <span class="text-xs text-gray-500">智能推薦</span>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 pb-safe z-50 h-[60px] flex justify-around items-center">
+        <a href="index.html" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[10px]">首頁</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 text-kd w-1/5">
+            <i class="fas fa-th-large text-lg"></i>
+            <span class="text-[10px]">分類</span>
+        </a>
+        
+        <!-- Center Action Button (Orders) -->
+        <a href="orders.html" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd relative">
+            <div class="absolute -top-6 bg-kd w-12 h-12 rounded-full border-4 border-gray-100 flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-clipboard-list text-xl"></i>
+            </div>
+            <span class="text-[10px] mt-7">查訂單</span>
+        </a>
+
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd" onclick="alert('開啟業務對話視窗')">
+            <i class="fas fa-comment-alt text-lg"></i>
+            <span class="text-[10px]">聯絡業務</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 w-1/5 hover:text-kd">
+            <i class="fas fa-user text-lg"></i>
+            <span class="text-[10px]">會員</span>
+        </a>
+    </nav>
+
+    <script>
+        // 科定分類數據 - 方案B (視覺化瀑布流)
+        const visualCategories = [
+            {
+                id: 'wood-panels',
+                name: '塗裝木皮板',
+                description: '天然木紋',
+                size: 'large',
+                background: 'linear-gradient(135deg, #8B4513 0%, #D2691E 100%)',
+                image: 'https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=400&h=300&fit=crop',
+                productCount: 156,
+                tags: ['trending', 'popular'],
+                trending: true
+            },
+            {
+                id: 'kd-flooring',
+                name: 'KD木地板',
+                description: '超耐磨地板',
+                size: 'large',
+                background: 'linear-gradient(135deg, #CD853F 0%, #DEB887 100%)',
+                image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop',
+                productCount: 124,
+                tags: ['trending', 'floor'],
+                trending: true
+            },
+            {
+                id: 'eco-boards',
+                name: '環保批批板',
+                description: '零甲醛',
+                size: 'medium',
+                background: 'linear-gradient(135deg, #228B22 0%, #90EE90 100%)',
+                image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&h=200&fit=crop',
+                productCount: 89,
+                tags: ['eco', 'new'],
+                isEco: true
+            },
+            {
+                id: 'starlight-panels',
+                name: '星光擬真板',
+                description: '逼真質感',
+                size: 'medium',
+                background: 'linear-gradient(135deg, #4B0082 0%, #9370DB 100%)',
+                image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400&h=200&fit=crop',
+                productCount: 78,
+                tags: ['new', 'trending']
+            },
+            {
+                id: 'melamine-boards',
+                name: '環保美耐板',
+                description: '耐磨耐刮',
+                size: 'small',
+                background: 'linear-gradient(135deg, #1E90FF 0%, #87CEEB 100%)',
+                image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=150&fit=crop',
+                productCount: 234,
+                tags: ['eco', 'popular']
+            },
+            {
+                id: 'materials-accessories',
+                name: '材料配件',
+                description: '膠水工具',
+                size: 'small',
+                background: 'linear-gradient(135deg, #DC143C 0%, #FF6347 100%)',
+                image: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=150&fit=crop',
+                productCount: 189,
+                tags: ['trending', 'popular']
+            },
+            {
+                id: 'particle-boards',
+                name: '塑合板',
+                description: '經濟實用',
+                size: 'medium',
+                background: 'linear-gradient(135deg, #696969 0%, #A9A9A9 100%)',
+                image: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400&h=200&fit=crop',
+                productCount: 67,
+                tags: ['popular']
+            }
+        ];
+
+        let currentFilter = 'all';
+        let searchMode = false;
+
+        // Render categories in masonry grid
+        function renderVisualCategories(filteredCategories = visualCategories) {
+            const container = document.getElementById('categoryGrid');
+            container.innerHTML = filteredCategories.map(category => `
+                <div class="grid-item">
+                    <div class="visual-card category-${category.size} rounded-2xl overflow-hidden cursor-pointer shadow-lg"
+                         style="background: ${category.background};"
+                         onclick="openCategory('${category.id}')">
+                        
+                        <!-- Background Image -->
+                        <div class="absolute inset-0 bg-cover bg-center" 
+                             style="background-image: url('${category.image}');"></div>
+                        
+                        <!-- Content Overlay -->
+                        <div class="card-content absolute inset-0 p-4 flex flex-col justify-between text-white">
+                            <!-- Top badges -->
+                            <div class="flex justify-between items-start">
+                                <div class="space-y-1">
+                                    ${category.trending ? '<span class="trending-badge bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit"><i class="fas fa-fire"></i>熱門</span>' : ''}
+                                    ${category.isEco ? '<span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-fit"><i class="fas fa-leaf"></i>環保</span>' : ''}
+                                </div>
+                                <div class="bg-black bg-opacity-30 backdrop-blur-sm rounded-full px-2 py-1">
+                                    <span class="text-xs font-medium">${category.productCount}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Bottom content -->
+                            <div>
+                                <h3 class="font-bold text-lg mb-1 drop-shadow-lg">${category.name}</h3>
+                                <p class="text-sm opacity-90 drop-shadow-md">${category.description}</p>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <i class="fas fa-arrow-right text-sm"></i>
+                                    <span class="text-sm font-medium">探索更多</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter categories
+        function filterCategories(filterType) {
+            currentFilter = filterType;
+            
+            // Update filter chips
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            let filteredCategories = visualCategories;
+            
+            switch(filterType) {
+                case 'trending':
+                    filteredCategories = visualCategories.filter(cat => cat.tags.includes('trending'));
+                    break;
+                case 'new':
+                    filteredCategories = visualCategories.filter(cat => cat.tags.includes('new'));
+                    break;
+                case 'eco':
+                    filteredCategories = visualCategories.filter(cat => cat.tags.includes('eco'));
+                    break;
+                case 'floor':
+                    filteredCategories = visualCategories.filter(cat => cat.tags.includes('floor'));
+                    break;
+            }
+            
+            renderVisualCategories(filteredCategories);
+        }
+
+        // Toggle search mode
+        function toggleSearchMode() {
+            searchMode = !searchMode;
+            const searchModeDiv = document.getElementById('searchMode');
+            
+            if (searchMode) {
+                searchModeDiv.classList.remove('hidden');
+                document.getElementById('visualSearch').focus();
+            } else {
+                searchModeDiv.classList.add('hidden');
+                clearSearch();
+            }
+        }
+
+        // Handle visual search
+        function handleVisualSearch(event) {
+            const keyword = event.target.value.toLowerCase();
+            
+            if (keyword.length > 0) {
+                const filteredCategories = visualCategories.filter(cat => 
+                    cat.name.toLowerCase().includes(keyword) || 
+                    cat.description.toLowerCase().includes(keyword) ||
+                    cat.tags.some(tag => tag.includes(keyword))
+                );
+                renderVisualCategories(filteredCategories);
+            } else {
+                renderVisualCategories();
+            }
+        }
+
+        // Clear search
+        function clearSearch() {
+            document.getElementById('visualSearch').value = '';
+            renderVisualCategories();
+        }
+
+        // Smart recommendations
+        function showRecommendations() {
+            alert('🤖 AI 智能推薦功能\n\n根據您的瀏覽記錄，推薦：\n• 超耐磨木地板系列\n• 環保綠建材\n• 熱門裝修配件\n\n(實際會根據用戶行為推薦)');
+        }
+
+        function openCategory(categoryId) {
+            alert(`開啟分類：${categoryId}\n(實際會導航到商品列表頁)`);
+        }
+
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // Hide scrollbar CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            .hide-scroll::-webkit-scrollbar {
+                display: none;
+            }
+            .hide-scroll {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderVisualCategories();
+        });
+    </script>
+</body>
+</html>
